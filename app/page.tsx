@@ -57,7 +57,7 @@ export default function Home() {
       ["02","Реальные остатки","Проверяем наличие перед отправкой"],
       ["03","Широкий ассортимент","Товары для стройки и ремонта"],
       ["04","Решение под задачу","Поможем подобрать и рассчитать"]
-      .map(([n,t,s]) => <article key={n}><small>{n}</small><b>{t}</b><span>{s}</span></article>)}</section>
+    ].map(([n,t,s]) => <article key={n}><small>{n}</small><b>{t}</b><span>{s}</span></article>)}</section>
 
     <section className="cats shell">
       <div className="sectionHead"><div><h2>Популярные категории</h2><p>Быстрый вход в основные группы каталога</p></div><button>Весь каталог ›</button></div>
