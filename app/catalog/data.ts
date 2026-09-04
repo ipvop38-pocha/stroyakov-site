@@ -1,17 +1,33 @@
-export type CatalogProduct = { id: string; slug: string; brand: string; name: string; category: string; stock: number; popularity: number; price: number; oldPrice?: number; unit: string; image: string; code: string; description?: string; specs?: [string,string][] };
+import generated from './products.generated.json';
+
+export type ProductCalculator =
+  | { type: 'sheet'; area: number }
+  | { type: 'dry-mix'; weight: number; consumptionAt10mm: number; minThickness: number; maxThickness: number; defaultThickness: number };
+
+export type CatalogProduct = {
+  id: string; slug: string; brand: string; name: string; category: string;
+  stock: number | null; popularity: number; price: number | null; oldPrice?: number;
+  unit: string; image: string; code: string; searchAliases?: string[];
+  description?: string; specs?: [string, string][];
+  photoStyle?: string; variantGroup?: string; variantLabel?: string;
+  calculator?: ProductCalculator; sources?: { label: string; url: string }[];
+};
 
 export const catalogCategories = [
-  { name:"Сухие смеси", slug:"mixes", note:"Штукатурки, шпаклёвки, клеи", image:"/assets/categories/dry-mixes.png" },
-  { name:"Гипсокартон", slug:"drywall", note:"ГКЛ, ГКЛВ и листовые материалы", image:"/assets/categories/drywall.png" },
-  { name:"Профили и комплектующие", slug:"profiles", note:"Профили, подвесы и элементы каркаса", image:"/assets/categories/profiles.png" },
-  { name:"Утеплители", slug:"insulation", note:"Минеральная вата и XPS", image:"/assets/categories/insulation.png" },
-  { name:"Кирпич и блоки", slug:"bricks", note:"Стеновые материалы", image:"/assets/categories/bricks.png" },
-  { name:"Крепёж", slug:"fasteners", note:"Саморезы, дюбели, подвесы", image:"/assets/categories/fasteners.png" },
+  { name: 'Сухие смеси', slug: 'mixes', note: 'Штукатурки, шпаклёвки, клеи', image: '/assets/categories/dry-mixes.png' },
+  { name: 'Гипсокартон', slug: 'drywall', note: 'ГКЛ, ГКЛВ и листовые материалы', image: '/assets/categories/drywall.png' },
+  { name: 'Профили и комплектующие', slug: 'profiles', note: 'Профили, подвесы и элементы каркаса', image: '/assets/categories/profiles.png' },
+  { name: 'Утеплители', slug: 'insulation', note: 'Минеральная вата и XPS', image: '/assets/categories/insulation.png' },
+  { name: 'Кирпич и блоки', slug: 'bricks', note: 'Стеновые материалы', image: '/assets/categories/bricks.png' },
+  { name: 'Крепёж', slug: 'fasteners', note: 'Саморезы, дюбели, подвесы', image: '/assets/categories/fasteners.png' },
 ];
+export const categoryMap: Record<string, string> = Object.fromEntries([
+  ...catalogCategories.map(item => [item.slug, item.name]), ['sheet', 'Листовые материалы'],
+]);
+export function categoryUrl(category: string) {
+  const slug = Object.entries(categoryMap).find(([, name]) => name === category)?.[0];
+  return slug ? `/catalog/?category=${slug}#products` : '/catalog/#products';
+}
 
-export const catalogProducts: CatalogProduct[] = [
-  { id: "00140", slug: "danogips-moisture-12-5", brand: "DANOGIPS", name: "Гипсокартон влагостойкий 12,5 мм", category: "Гипсокартон", stock: 2125, popularity: 22089, price: 430, oldPrice: 448, unit: "лист", image: "/assets/products/drywall-moisture.jpg", code: "00140", description:"Влагостойкий гипсокартон для облицовки стен, перегородок и подвесных потолков в помещениях с повышенной влажностью. Зелёный картон упрощает визуальную идентификацию материала на объекте.", specs:[["Размер листа","2500 × 1200 мм"],["Толщина","12,5 мм"],["Площадь листа","3 м²"],["Тип кромки","УК"],["Назначение","Стены и перегородки"],["Влагостойкость","Повышенная"]] },
-  { id: "00142", slug: "danogips-standard-12-5", brand: "DANOGIPS", name: "Гипсокартон обычный 12,5 мм", category: "Гипсокартон", stock: 820, popularity: 16489, price: 370, oldPrice: 392, unit: "лист", image: "/assets/products/drywall-standard.jpg", code: "00142", description:"Стандартный стеновой гипсокартон для сухих помещений: перегородки, облицовки и короба. Подходит для последующей шпаклёвки, окраски и оклейки обоями.", specs:[["Размер листа","2500 × 1200 мм"],["Толщина","12,5 мм"],["Площадь листа","3 м²"],["Тип кромки","УК"],["Назначение","Стены и перегородки"],["Влагостойкость","Стандартная"]] },
-  { id: "00144", slug: "danogips-standard-9-5", brand: "DANOGIPS", name: "Гипсокартон обычный 9,5 мм", category: "Гипсокартон", stock: 1319, popularity: 13727, price: 335, oldPrice: 360, unit: "лист", image: "/assets/products/drywall-standard.jpg", code: "00144", description:"Облегчённый гипсокартон для потолочных конструкций и декоративных элементов в сухих помещениях.", specs:[["Размер листа","2500 × 1200 мм"],["Толщина","9,5 мм"],["Площадь листа","3 м²"],["Тип кромки","УК"],["Назначение","Потолки"],["Влагостойкость","Стандартная"]] },
-  { id: "01257", slug: "osb-ultradecor-9", brand: "ULTRADECOR", name: "Плита OSB-3 влагостойкая 9 мм, 1220×2440", category: "Листовые материалы", stock: 141, popularity: 4734, price: 795, unit: "лист", image: "/assets/products/osb.jpg", code: "01257", description:"Влагостойкая конструкционная плита для обшивки каркасов, настилов и вспомогательных строительных работ.", specs:[["Размер","1220 × 2440 мм"],["Толщина","9 мм"],["Тип","OSB-3"],["Площадь листа","2,98 м²"],["Поверхность","Нешлифованная"],["Назначение","Конструкционные работы"]] },
-];
+export const catalogProducts = generated.products as CatalogProduct[];
+export const catalogStockMoment = generated.stockMoment;

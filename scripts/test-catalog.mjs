@@ -1,0 +1,34 @@
+import assert from 'node:assert/strict';
+import { readFile, access } from 'node:fs/promises';
+import { calculateProductQuantity, productPriceText, productStockText } from '../app/lib/product-presentation.ts';
+import { matchesProductSearch } from '../app/lib/product-search.ts';
+const catalog = JSON.parse(await readFile('app/catalog/products.generated.json', 'utf8'));
+const selected = JSON.parse(await readFile('private/moysklad/catalog-frequency.json', 'utf8'));
+const snapshot = JSON.parse(await readFile('private/moysklad/catalog-snapshot.json', 'utf8'));
+for (const product of catalog.products) {
+  const sale = selected.products.find(p => p.code === product.code);
+  const current = snapshot.products.find(p => p.code === product.code);
+  assert.ok(sale?.saleCount >= 5, 'Five distinct sales required');
+  assert.doesNotMatch(`${sale.name} ${sale.categoryPath}`, /поликарбонат/i);
+  assert.equal(product.price, current.retailPriceMinor === null ? null : current.retailPriceMinor / 100);
+  assert.equal(product.stock, Math.max(0, current.stock - current.reserve));
+  assert.equal(matchesProductSearch(product, product.code), true);
+  await access('public' + product.image);
+  for (const forbidden of ['saleCount','soldQuantity','salePrices','retailCurrency','reserve','token','href','categoryPath']) assert.equal(forbidden in product, false, `Private field ${forbidden}`);
+}
+const rusgips = catalog.products.find(p => p.code === '00876');
+assert.ok(rusgips);
+for (const query of ['русгипс 6', 'rusgips штукатурка 30', 'штукатурка машинная', '00876']) assert.ok(matchesProductSearch(rusgips, query), query);
+assert.equal(matchesProductSearch(rusgips, 'русгипс 8'), false);
+assert.equal(calculateProductQuantity(rusgips.calculator, 100, 10, 10), 33);
+assert.equal(calculateProductQuantity(rusgips.calculator, 100, 10, 20), 66);
+assert.equal(calculateProductQuantity(rusgips.calculator, 100, 10, 51), null);
+assert.equal(calculateProductQuantity(rusgips.calculator, 100, 10, NaN), null);
+assert.equal(calculateProductQuantity({ type: 'sheet', area: 3 }, 12, 10, 10), 5);
+assert.equal(calculateProductQuantity(undefined, 12, 10, 10), null);
+assert.equal(calculateProductQuantity(rusgips.calculator, 0, 10, 10), null);
+assert.equal(productPriceText(null), 'Цена по запросу');
+assert.equal(productStockText({ stock: null, unit: 'мешок' }), 'Наличие уточняется');
+assert.equal(productStockText({ stock: 0, unit: 'мешок' }), 'Уточнить срок поставки');
+assert.equal(productStockText({ stock: 513, unit: 'мешок' }), 'В наличии: 513 мешков');
+console.log(`Catalog verified: ${catalog.products.length} products; retail prices, selection, privacy, assets, search and quantity calculation.`);

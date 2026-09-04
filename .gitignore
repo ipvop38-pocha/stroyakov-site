@@ -9,3 +9,6 @@ out/
 .env
 .env.*
 !.env.example
+
+# Private integration audit data must never enter the public site or repository.
+/private/

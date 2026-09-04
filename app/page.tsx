@@ -25,6 +25,8 @@ import {
 } from "@phosphor-icons/react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { catalogProducts, CatalogProduct as Product } from "./catalog/data";
+import { productPriceText, productStockText } from "./lib/product-presentation";
+import { matchesProductSearch } from "./lib/product-search";
 import { readCart, readFavorites, writeCart, writeFavorites } from "./lib/commerce";
 
 const categories = [
@@ -141,8 +143,8 @@ function ProductCard({ product, favorite, onFavorite, onAdd }: {
 }) {
   return (
     <article className="product-card">
-      <div className="product-media">
-        <span className="product-badge">Хит</span>
+      <div className={`product-media ${product.photoStyle === "approved-studio" ? "studio-product-image" : ""}`}>
+
         <button
           aria-label={favorite ? "Убрать из избранного" : "Добавить в избранное"}
           className={`favorite-button ${favorite ? "is-active" : ""}`}
@@ -151,20 +153,20 @@ function ProductCard({ product, favorite, onFavorite, onAdd }: {
         >
           <Heart aria-hidden weight={favorite ? "fill" : "regular"} />
         </button>
-        <Image alt={product.name} fill sizes="(max-width: 767px) 294px, 244px" src={product.image} />
+        <Link href={`/product/${product.slug}/`}><Image alt={product.name} fill sizes="(max-width: 767px) 294px, 244px" src={product.image} /></Link>
       </div>
       <div className="product-copy">
         <p className="product-brand">{product.brand}</p>
-        <h3>{product.name}</h3>
-        <p className="product-stock"><span />В наличии: {product.stock} {pluralize(product.stock, "лист", "листа", "листов")}</p>
+        <h3><Link href={`/product/${product.slug}/`}>{product.name}</Link></h3>
+        <p className={`product-stock ${product.stock && product.stock > 0 ? "" : "stock-unconfirmed"}`}><span />{productStockText(product)}</p>
         <div className="product-price-row">
-          <strong>{formatPrice(product.price)} ₽</strong>
+          <strong>{productPriceText(product.price)}</strong>
           {product.oldPrice && <del>{formatPrice(product.oldPrice)} ₽</del>}
-          <small>/ {product.unit}</small>
+          {product.price !== null && <small>/ {product.unit}</small>}
         </div>
       </div>
       <button className="add-button" onClick={onAdd} type="button">
-        В корзину <ShoppingCartSimple aria-hidden weight="bold" />
+        {product.price === null ? "Уточнить цену" : "В корзину"} <ShoppingCartSimple aria-hidden weight="bold" />
       </button>
     </article>
   );
@@ -175,8 +177,8 @@ function SearchResults({ items, onSelect }: { items: Product[]; onSelect: (produ
     <div className="search-results">
       {items.length ? items.map((product) => (
         <button key={product.id} onMouseDown={() => onSelect(product)} type="button">
-          <span><b>{product.name}</b><small>{product.brand} · в наличии</small></span>
-          <strong>{formatPrice(product.price)} ₽</strong>
+          <span><b>{product.name}</b><small>{product.brand} · {productStockText(product)}</small></span>
+          <strong>{productPriceText(product.price)}</strong>
         </button>
       )) : <p>По вашему запросу ничего не найдено</p>}
     </div>
@@ -199,7 +201,7 @@ export default function Home() {
   const suggestions = useMemo(() => {
     const needle = query.trim().toLowerCase();
     if (!needle) return products.slice(0, 3);
-    return products.filter((product) => `${product.brand} ${product.name}`.toLowerCase().includes(needle)).slice(0, 4);
+    return products.filter((product) => matchesProductSearch(product, needle)).slice(0, 4);
   }, [query]);
   const drywallSheets = Math.ceil((area * 2) / 3);
   const screwCount = Math.ceil((area * 40) / 50) * 50;
@@ -217,8 +219,10 @@ export default function Home() {
   }
 
   function addProduct(product: Product) {
+    if (product.price === null) { window.location.href = "/contacts/"; return; }
+    const price = product.price;
     setCartCount((count) => count + 1);
-    setCartTotal((total) => total + product.price);
+    setCartTotal((total) => total + price);
     const stored = readCart();
     const id = `product-${product.id}`;
     const existing = stored.find((item) => item.id === id);
@@ -372,7 +376,7 @@ export default function Home() {
         <h2 className="section-title compact">Популярные товары</h2>
         <div className="horizontal-viewport product-viewport">
           <div className="product-track">
-            {products.map((product) => (
+            {products.slice(0, 4).map((product) => (
               <ProductCard
                 favorite={favorites.includes(product.id)}
                 key={product.id}
