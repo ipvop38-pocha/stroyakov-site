@@ -28,13 +28,13 @@ import { catalogProducts, CatalogProduct as Product } from "./catalog/data";
 import { readCart, readFavorites, writeCart, writeFavorites } from "./lib/commerce";
 
 const categories = [
-  { label: "Сухие смеси", image: "/assets/categories/dry-mixes.png", href: "/catalog?category=mixes#products" },
-  { label: "Гипсокартон", image: "/assets/categories/drywall.png", href: "/catalog?category=drywall#products" },
-  { label: "Профили", image: "/assets/categories/profiles.png", href: "/catalog?category=profiles#products" },
-  { label: "Утеплители", image: "/assets/categories/insulation.png", href: "/catalog?category=insulation#products" },
-  { label: "Кирпич и блоки", image: "/assets/categories/bricks.png", href: "/catalog?category=bricks#products" },
-  { label: "Крепёж", image: "/assets/categories/fasteners.png", href: "/catalog?category=fasteners#products" },
-  { label: "Все категории", image: "/assets/categories/all.png", href: "/catalog" },
+  { label: "Сухие смеси", image: "/assets/categories/dry-mixes.png", href: "/catalog/?category=mixes#products" },
+  { label: "Гипсокартон", image: "/assets/categories/drywall.png", href: "/catalog/?category=drywall#products" },
+  { label: "Профили", image: "/assets/categories/profiles.png", href: "/catalog/?category=profiles#products" },
+  { label: "Утеплители", image: "/assets/categories/insulation.png", href: "/catalog/?category=insulation#products" },
+  { label: "Кирпич и блоки", image: "/assets/categories/bricks.png", href: "/catalog/?category=bricks#products" },
+  { label: "Крепёж", image: "/assets/categories/fasteners.png", href: "/catalog/?category=fasteners#products" },
+  { label: "Все категории", image: "/assets/categories/all.png", href: "/catalog/" },
 ];
 
 const products: Product[] = catalogProducts;
@@ -83,25 +83,25 @@ const advantages = [
 ];
 
 const pageRoutes: Record<string, string> = {
-  "Каталог": "/catalog",
-  "Все категории": "/catalog",
-  "Готовые решения": "/solutions",
-  "Доставка и оплата": "/delivery",
-  "Для бизнеса": "/business",
-  "Контакты": "/contacts",
-  "Комплектация объектов": "/business/assembly",
-  "Личный кабинет": "/account",
-  "Избранное": "/favorites",
-  "Возврат товара": "/returns",
-  "Реквизиты": "/documents",
-  "Сухие смеси": "/catalog?category=mixes#products",
-  "Гипсокартон и листовые": "/catalog?category=drywall#products",
-  "Профили и крепёж": "/catalog?category=profiles#products",
-  "Утеплители": "/catalog?category=insulation#products",
-  "Кирпичи и блоки": "/catalog?category=bricks#products",
-  "Спецусловия для бизнеса": "/business",
-  "Работа с застройщиками": "/business",
-  "Поставки по ЮФО": "/business",
+  "Каталог": "/catalog/",
+  "Все категории": "/catalog/",
+  "Готовые решения": "/solutions/",
+  "Доставка и оплата": "/delivery/",
+  "Для бизнеса": "/business/",
+  "Контакты": "/contacts/",
+  "Комплектация объектов": "/business/assembly/",
+  "Личный кабинет": "/account/",
+  "Избранное": "/favorites/",
+  "Возврат товара": "/returns/",
+  "Реквизиты": "/documents/",
+  "Сухие смеси": "/catalog/?category=mixes#products",
+  "Гипсокартон и листовые": "/catalog/?category=drywall#products",
+  "Профили и крепёж": "/catalog/?category=profiles#products",
+  "Утеплители": "/catalog/?category=insulation#products",
+  "Кирпичи и блоки": "/catalog/?category=bricks#products",
+  "Спецусловия для бизнеса": "/business/",
+  "Работа с застройщиками": "/business/",
+  "Поставки по ЮФО": "/business/",
 };
 
 const formatPrice = (value: number) => new Intl.NumberFormat("ru-RU").format(value);
@@ -260,10 +260,10 @@ export default function Home() {
         <div className="utility-bar">
           <span><MapPin aria-hidden weight="bold" />Краснодар</span>
           <nav aria-label="Служебная навигация">
-            <button onClick={() => { window.location.href = "/delivery"; }} type="button">Доставка и оплата</button>
-            <button onClick={() => { window.location.href = "/solutions"; }} type="button">Готовые решения</button>
-            <button onClick={() => { window.location.href = "/business"; }} type="button">Для бизнеса</button>
-            <button onClick={() => { window.location.href = "/contacts"; }} type="button">Контакты</button>
+            <button onClick={() => { window.location.href = "/delivery/"; }} type="button">Доставка и оплата</button>
+            <button onClick={() => { window.location.href = "/solutions/"; }} type="button">Готовые решения</button>
+            <button onClick={() => { window.location.href = "/business/"; }} type="button">Для бизнеса</button>
+            <button onClick={() => { window.location.href = "/contacts/"; }} type="button">Контакты</button>
             <a href="tel:+79280446070"><Phone aria-hidden weight="bold" />+7 928 044-60-70</a>
           </nav>
         </div>
@@ -272,7 +272,7 @@ export default function Home() {
           <button aria-label="На главную" className="header-logo" onClick={() => scrollToSection("top")} type="button">
             <Image alt="Строяков — мы снабжаем" height={40} priority src="/assets/logo-header.png" width={144} />
           </button>
-          <button className="catalog-button" onClick={() => { window.location.href = "/catalog"; }} type="button">
+          <button className="catalog-button" onClick={() => { window.location.href = "/catalog/"; }} type="button">
             Каталог <List aria-hidden weight="bold" />
           </button>
           <div className="header-search">
@@ -282,18 +282,18 @@ export default function Home() {
               onBlur={() => window.setTimeout(() => setSearchOpen(false), 120)}
               onChange={(event) => setQuery(event.target.value)}
               onFocus={() => setSearchOpen(true)}
-              onKeyDown={(event) => { if (event.key === "Enter") window.location.href = `/catalog?q=${encodeURIComponent(query.trim())}`; }}
+              onKeyDown={(event) => { if (event.key === "Enter") window.location.href = `/catalog/?q=${encodeURIComponent(query.trim())}`; }}
               placeholder="Найти товар, бренд или категорию"
               value={query}
             />
-            {searchOpen && <SearchResults items={suggestions} onSelect={(product) => { window.location.href = `/product/${product.slug}`; }} />}
+            {searchOpen && <SearchResults items={suggestions} onSelect={(product) => { window.location.href = `/product/${product.slug}/`; }} />}
           </div>
           <div className="header-actions">
             <button aria-label="Войти в личный кабинет" onClick={() => notify("Вход в кабинет подключим на этапе авторизации")} type="button">
               <User aria-hidden />
               <span><small>Профиль</small><b>Войти</b></span>
             </button>
-            <button aria-label={`Избранное, товаров: ${favorites.length}`} onClick={() => { window.location.href = "/favorites"; }} type="button">
+            <button aria-label={`Избранное, товаров: ${favorites.length}`} onClick={() => { window.location.href = "/favorites/"; }} type="button">
               <Heart aria-hidden weight={favorites.length ? "fill" : "regular"} />
               <span><small>Избранное</small><b>{favorites.length}</b></span>
             </button>
@@ -318,11 +318,11 @@ export default function Home() {
             onBlur={() => window.setTimeout(() => setSearchOpen(false), 120)}
             onChange={(event) => setQuery(event.target.value)}
             onFocus={() => setSearchOpen(true)}
-            onKeyDown={(event) => { if (event.key === "Enter") window.location.href = `/catalog?q=${encodeURIComponent(query.trim())}`; }}
+            onKeyDown={(event) => { if (event.key === "Enter") window.location.href = `/catalog/?q=${encodeURIComponent(query.trim())}`; }}
             placeholder="Найти товар, бренд или категорию"
             value={query}
           />
-          {searchOpen && <SearchResults items={suggestions} onSelect={(product) => { window.location.href = `/product/${product.slug}`; }} />}
+          {searchOpen && <SearchResults items={suggestions} onSelect={(product) => { window.location.href = `/product/${product.slug}/`; }} />}
         </div>
       </header>
 
@@ -422,8 +422,8 @@ export default function Home() {
                 </div>
                 <p className="replacement-note"><span /><span className="desktop-copy">Каждый товар можно заменить совместимым аналогом</span><span className="mobile-copy">Любой товар можно заменить аналогом</span></p>
                 <div className="solution-actions">
-                <PrimaryButton onClick={() => { window.location.href = "/solutions/gkl-partition"; }}>Рассчитать комплект</PrimaryButton>
-                  <button className="ghost-link" onClick={() => { window.location.href = "/solutions/gkl-partition"; }} type="button">Что входит в решение <ArrowRight aria-hidden weight="bold" /></button>
+                <PrimaryButton onClick={() => { window.location.href = "/solutions/gkl-partition/"; }}>Рассчитать комплект</PrimaryButton>
+                  <button className="ghost-link" onClick={() => { window.location.href = "/solutions/gkl-partition/"; }} type="button">Что входит в решение <ArrowRight aria-hidden weight="bold" /></button>
                 </div>
               </div>
               <div className="featured-solution-image">
@@ -435,13 +435,13 @@ export default function Home() {
             <div className="secondary-solutions">
               <article className="secondary-solution">
                 <div className="secondary-solution-image"><Image alt="Слои подготовки стен под покраску" fill sizes="180px" src="/assets/solutions/paint-prep.jpg" /></div>
-                <div><h3>Стены под покраску</h3><p>От основания до гладкого финиша — под тип стены и требуемое качество.</p><span className="soft-pill">4 позиции</span><button onClick={() => { window.location.href = "/solutions/paint-prep"; }} type="button">Смотреть решение <ArrowRight aria-hidden weight="bold" /></button></div>
+                <div><h3>Стены под покраску</h3><p>От основания до гладкого финиша — под тип стены и требуемое качество.</p><span className="soft-pill">4 позиции</span><button onClick={() => { window.location.href = "/solutions/paint-prep/"; }} type="button">Смотреть решение <ArrowRight aria-hidden weight="bold" /></button></div>
               </article>
               <article className="secondary-solution">
                 <div className="secondary-solution-image"><Image alt="Слои утепления пола плитами XPS" fill sizes="180px" src="/assets/solutions/xps-floor.jpg" /></div>
-                <div><h3>Утепление пола XPS</h3><p>Плиты XPS, разделительная плёнка, армирование и материалы для стяжки.</p><span className="soft-pill">5 позиций</span><button onClick={() => { window.location.href = "/solutions/xps-floor"; }} type="button">Смотреть решение <ArrowRight aria-hidden weight="bold" /></button></div>
+                <div><h3>Утепление пола XPS</h3><p>Плиты XPS, разделительная плёнка, армирование и материалы для стяжки.</p><span className="soft-pill">5 позиций</span><button onClick={() => { window.location.href = "/solutions/xps-floor/"; }} type="button">Смотреть решение <ArrowRight aria-hidden weight="bold" /></button></div>
               </article>
-              <button className="all-solutions-button" onClick={() => { window.location.href = "/solutions"; }} type="button">Все готовые решения <ArrowRight aria-hidden weight="bold" /></button>
+              <button className="all-solutions-button" onClick={() => { window.location.href = "/solutions/"; }} type="button">Все готовые решения <ArrowRight aria-hidden weight="bold" /></button>
             </div>
           </div>
         </div>
@@ -540,7 +540,7 @@ export default function Home() {
         </div>
         <div className="footer-bottom">
           <span>© 2026 ООО «СТРОЯКОВ»</span>
-          <span><Link href="/legal/privacy">Политика конфиденциальности</Link><span className="footer-separator"> · </span><Link href="/legal/terms">Пользовательское соглашение</Link></span>
+          <span><Link href="/legal/privacy/">Политика конфиденциальности</Link><span className="footer-separator"> · </span><Link href="/legal/terms/">Пользовательское соглашение</Link></span>
           <span>Информация на сайте не является публичной офертой.</span>
         </div>
       </footer>
@@ -550,7 +550,7 @@ export default function Home() {
         <a href="tel:+79183410144"><Phone aria-hidden weight="bold" /><span>Позвонить</span></a>
         <button onClick={() => scrollToSection("calculation")} type="button"><ChatCircle aria-hidden weight="bold" /><span>Написать</span></button>
         <button className="mobile-nav-primary" onClick={() => scrollToSection("catalog")} type="button"><GridFour aria-hidden weight="bold" /><span>Каталог</span></button>
-        <button onClick={() => { window.location.href = "/favorites"; }} type="button"><Heart aria-hidden weight={favorites.length ? "fill" : "bold"} /><span>Избранное</span></button>
+        <button onClick={() => { window.location.href = "/favorites/"; }} type="button"><Heart aria-hidden weight={favorites.length ? "fill" : "bold"} /><span>Избранное</span></button>
         <button onClick={() => setCartOpen(true)} type="button"><ShoppingCartSimple aria-hidden weight="bold" /><span>Корзина</span>{cartCount > 0 && <b>{cartCount}</b>}</button>
       </nav>
 
@@ -561,15 +561,15 @@ export default function Home() {
             <Image alt="Строяков" height={40} src="/assets/logo-header.png" width={144} />
             <h2>Меню</h2>
             {[
-              ["Каталог", "/catalog"],
-              ["Готовые решения", "/solutions"],
-              ["Доставка и оплата", "/delivery"],
-              ["Для бизнеса", "/business"],
-              ["Контакты", "/contacts"],
+              ["Каталог", "/catalog/"],
+              ["Готовые решения", "/solutions/"],
+              ["Доставка и оплата", "/delivery/"],
+              ["Для бизнеса", "/business/"],
+              ["Контакты", "/contacts/"],
             ].map(([label, href]) => (
               <button key={label} onClick={() => { setMenuOpen(false); window.location.href = href; }} type="button">{label}<ArrowRight aria-hidden /></button>
             ))}
-            <button onClick={() => { setMenuOpen(false); window.location.href = "/favorites"; }} type="button">Избранное{favorites.length ? ` · ${favorites.length}` : ""}<Heart aria-hidden weight={favorites.length ? "fill" : "bold"} /></button>
+            <button onClick={() => { setMenuOpen(false); window.location.href = "/favorites/"; }} type="button">Избранное{favorites.length ? ` · ${favorites.length}` : ""}<Heart aria-hidden weight={favorites.length ? "fill" : "bold"} /></button>
             <a href="tel:+79280446070"><Phone aria-hidden weight="bold" />+7 928 044-60-70</a>
           </aside>
         </div>
@@ -582,7 +582,7 @@ export default function Home() {
             <span className="cart-panel-icon"><ShoppingCartSimple aria-hidden weight="bold" /></span>
             <h2>{cartCount ? "Корзина собрана" : "Корзина пуста"}</h2>
             <p>{cartCount ? `${cartCount} ${pluralize(cartCount, "позиция", "позиции", "позиций")} на сумму ${formatPrice(cartTotal)} ₽. Состав можно уточнить перед оформлением.` : "Добавьте товар или готовый комплект — он появится здесь."}</p>
-            {cartCount > 0 && <PrimaryButton onClick={() => { setCartOpen(false); window.location.href = "/cart"; }}>Перейти к оформлению</PrimaryButton>}
+            {cartCount > 0 && <PrimaryButton onClick={() => { setCartOpen(false); window.location.href = "/cart/"; }}>Перейти к оформлению</PrimaryButton>}
             <button className="secondary-button" onClick={() => setCartOpen(false)} type="button">Продолжить покупки</button>
           </aside>
         </div>
