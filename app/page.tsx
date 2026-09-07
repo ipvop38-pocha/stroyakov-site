@@ -24,7 +24,7 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { catalogProducts, CatalogProduct as Product } from "./catalog/data";
+import { catalogProducts, featuredProducts, CatalogProduct as Product } from "./catalog/data";
 import { ProductImage } from "./components/catalog-product-card";
 import { productPriceText, productStockText } from "./lib/product-presentation";
 import { matchesProductSearch } from "./lib/product-search";
@@ -375,7 +375,7 @@ export default function Home() {
         <h2 className="section-title compact">Популярные товары</h2>
         <div className="horizontal-viewport product-viewport">
           <div className="product-track">
-            {products.slice(0, 4).map((product) => (
+            {featuredProducts.map((product) => (
               <ProductCard
                 favorite={favorites.includes(product.id)}
                 key={product.id}

@@ -1,5 +1,6 @@
 import { readFile, writeFile, access } from 'node:fs/promises';
 import path from 'node:path';
+import { classifyProduct, hiddenCatalogName } from './catalog-taxonomy.mjs';
 
 const read = async file => JSON.parse(await readFile(file, 'utf8'));
 const [snapshot, editorial] = await Promise.all([
@@ -7,61 +8,9 @@ const [snapshot, editorial] = await Promise.all([
   read('catalog/editorial.json'),
 ]);
 const curated = new Map(editorial.filter(product => product.status === 'published').map(product => [product.code, product]));
+const merchandising = await read('catalog/merchandising.json');
+const popularity = new Map(merchandising.rankedIds.map((code, index) => [code, merchandising.rankedIds.length - index]));
 const operationalCodes = new Set(['0545816227']); // «Доставка (товар)» is not a physical catalog product.
-
-const categoryRules = [
-  ['Металлопрокат', /\(В\) МЕТАЛЛ|АРМАТУР|ТРУБЫ|УГОЛКИ|ШВЕЛЛЕР|ЛИСТЫ Г\/К|ПРОВОЛОКА/i],
-  ['Гипсокартон и листовые', /ГИПСОКАРТОН|\bПГ[ОВ]\b|\bГСП\b|\bOSB\b|\bОС[БП]\b|ШИФЕР/i],
-  ['Крепёж', /КРЕПЕЖ|КРЕПЁЖ|САМОРЕЗ|ДЮБЕЛ|ХОМУТ/i],
-  ['Профили и комплектующие', /ПРОФИЛЬ|ПОДВЕС|МАЯЧК|\bМАЯК\b|УГОЛОК ПВХ|ЗАГЛУШК/i],
-  ['Инструмент и расходники', /СОПУТКА|ПЕРЧАТК|ЛЕНТ|СЕТК|КИСТ|ВАЛИК|КРУГИ|ШПАТЕЛ|КАРАНДАШ|ЧЕРЕНОК|ТАЗ СТРОИТЕЛЬНЫЙ|ПЛЕНКА|ПЛЁНКА/i],
-  ['Сухие смеси', /ШТУКАТУР|ШПАКЛ|ШПАТЛ|ПЛИТОЧНЫЙ КЛЕЙ|КЛЕЙ ДЛЯ ПЛИТКИ|НАЛИВНОЙ ПОЛ|СТЯЖК|РОВНИТЕЛ|КЛАДКА И МОНТАЖ|МОНТАЖНЫЙ КЛЕЙ|\bЦПС\b|САТИНТЕК|ВЯЖУЩЕЕ ГИПСОВОЕ|ГИПС СТРОИТЕЛЬНЫЙ/i],
-  ['Утеплители', /ПЕНОПЛЭКС|ИЗОЛАЙФ|УТЕПЛ|ПОДЛОЖК/i],
-  ['Гидроизоляция и кровля', /ГИДРОИЗОЛ|БИПОЛЬ|УНИФЛЕКС|ПРАЙМЕР БИТУМ/i],
-  ['Пены и герметики', /ПЕНА|ГЕРМЕТИК/i],
-  ['ЛКМ и грунтовки', /ГРУНТ|КРАСК|ЛАК|ЭМАЛ/i],
-  ['Стеновые материалы', /БЛОКИ|КИРПИЧ/i],
-  ['Цемент', /ЦЕМЕНТ/i],
-];
-
-function categoryFor(product) {
-  const haystack = `${product.categoryPath} ${product.name}`;
-  return categoryRules.find(([, pattern]) => pattern.test(haystack))?.[0] || 'Прочие материалы';
-}
-
-function productKindFor(product, category) {
-  const text = `${product.categoryPath} ${product.name}`;
-  const rules = [
-    ['Штукатурки', /ШТУКАТУР/i], ['Шпаклёвки', /ШПАКЛ|ШПАТЛ|САТИНТЕК/i],
-    ['Плиточные клеи', /ПЛИТОЧНЫЙ КЛЕЙ|КЛЕЙ ДЛЯ ПЛИТКИ|КЛЕЙ ПЛИТОЧНЫЙ|КЛЕЙ Д\/ПЛИТКИ/i],
-    ['Смеси для пола', /НАЛИВНОЙ ПОЛ|СТЯЖК|РОВНИТЕЛ|НИВЕЛИР/i],
-    ['Кладочные и монтажные смеси', /КЛАДКА И МОНТАЖ|МОНТАЖНЫЙ КЛЕЙ|\bМ-?150\b|\bМ-?300\b|\bЦПС\b/i],
-    ['Гипсокартон', /ГИПСОКАРТОН|\bПГ[ОВ]\b|\bГСП\b/i], ['OSB', /\bOSB\b|\bОС[БП]\b/i],
-    ['Шифер', /ШИФЕР/i], ['Потолочные профили', /ПОТОЛОЧНЫЙ/i], ['Стеновые профили', /СТЕНОВОЙ/i],
-    ['Маяки и уголки', /МАЯЧК|МАЯК|УГОЛОК ПВХ/i], ['Грунтовки', /ГРУНТ/i],
-    ['Краски', /КРАСК/i], ['Теплоизоляция', /ПЕНОПЛЭКС|ИЗОЛАЙФ|УТЕПЛ/i],
-    ['Арматура', /АРМАТУР/i], ['Трубы', /ТРУБ/i], ['Саморезы', /САМОРЕЗ/i],
-  ];
-  return rules.find(([, pattern]) => pattern.test(text))?.[0] || category;
-}
-
-function subgroupFor(product, category, kind) {
-  const text = `${product.categoryPath} ${product.name}`;
-  const rules = {
-    'Крепёж': [['Дюбели', /ДЮБЕЛ/i], ['Саморезы', /САМОРЕЗ|ШУРУП/i], ['Хомуты', /ХОМУТ/i], ['Анкеры', /АНКЕР/i]],
-    'Инструмент и расходники': [['Отрезные диски', /КРУГ ОТРЕЗ|ДИСК ОТР/i], ['Сетки и ленты', /СЕТК|ЛЕНТ/i], ['Малярный инструмент', /КИСТ|ВАЛИК|КАРАНДАШ/i], ['Шпатели и правила', /ШПАТЕЛ|ПРАВИЛ/i], ['Средства защиты', /ПЕРЧАТК/i], ['Ёмкости', /ВЕДРО|ТАЗ|ЕМКОСТ/i], ['Плёнки и мешки', /ПЛЕНК|ПЛЁНК|МЕШК/i], ['Ножи и лезвия', /НОЖ|ЛЕЗВИ/i], ['Сварочные материалы', /ЭЛЕКТРОД/i], ['Ручной инструмент', /ЧЕРЕНОК|ЛОПАТ|ТЯПК/i]],
-    'Профили и комплектующие': [['Маяки', /МАЯЧК|\bМАЯК\b/i], ['Уголки', /УГОЛОК ПВХ|ПРОФИЛЬ УГЛОВОЙ/i], ['Подвесы', /ПОДВЕС/i], ['Заглушки', /ЗАГЛУШК/i], ['Потолочные профили', /ПОТОЛОЧН|\bПП\b|\bППН\b/i], ['Стеновые профили', /СТЕНОВОЙ|\bПС\b|\bПН\b/i]],
-    'Металлопрокат': [['Арматура', /АРМАТУР/i], ['Трубы', /ТРУБ/i], ['Уголки', /УГОЛ/i], ['Швеллеры', /ШВЕЛЛЕР/i], ['Листовой металл', /ЛИСТ/i], ['Проволока', /ПРОВОЛОК/i]],
-    'ЛКМ и грунтовки': [['Грунтовки', /ГРУНТ/i], ['Краски', /КРАСК/i], ['Эмали и лаки', /ЭМАЛ|ЛАК/i]],
-    'Гидроизоляция и кровля': [['Рулонная кровля', /БИПОЛЬ|УНИФЛЕКС|МЕМБРАН/i], ['Мастики и праймеры', /МАСТИК|ПРАЙМЕР/i], ['Гидроизоляционные смеси', /ГИДРОИЗОЛ/i]],
-    'Пены и герметики': [['Монтажные пены', /ПЕНА/i], ['Герметики', /ГЕРМЕТИК/i]],
-    'Утеплители': [['XPS', /ПЕНОПЛЭКС|\bXPS\b/i], ['Минеральная вата', /IZOLIFE|ИЗОЛАЙФ|МИНЕРАЛ/i], ['Подложки', /ПОДЛОЖК/i]],
-    'Гипсокартон и листовые': [['Гипсокартон', /ГИПСОКАРТОН|\bПГ[ОВ]\b|\bГСП\b/i], ['OSB', /\bOSB\b|\bОС[БП]\b/i], ['Шифер', /ШИФЕР/i]],
-    'Стеновые материалы': [['Блоки', /БЛОК/i], ['Кирпич', /КИРПИЧ/i]],
-    'Сухие смеси': [['Штукатурки', /ШТУКАТУР/i], ['Шпаклёвки', /ШПАКЛ|ШПАТЛ|САТИНТЕК/i], ['Плиточные клеи', /КЛЕЙ.*ПЛИТ|ПЛИТОЧНЫЙ КЛЕЙ/i], ['Смеси для пола', /ПОЛ|СТЯЖК|РОВНИТЕЛ|НИВЕЛИР/i], ['Кладочные и монтажные смеси', /КЛАДК|МОНТАЖ|\bЦПС\b|\bМ-?150\b|\bМ-?300\b/i]],
-  };
-  return rules[category]?.find(([, pattern]) => pattern.test(text))?.[0] || kind;
-}
 
 function canonicalTitle(title, raw, brand) {
   const dimensionSource = raw.replace(/Т\d+\s*[-–]\s*/i, '');
@@ -157,6 +106,7 @@ function brandFor(product) {
 function unitFor(product, category) {
   const api = product.unit?.name?.toLowerCase();
   if (api === 'шт' || api === 'шт.') {
+    if (/superfinish|готов|гот\.|kleifix|эпоксид|затирк/iu.test(product.rawName)) return 'шт.';
     if (category === 'Сухие смеси' || category === 'Цемент') return 'мешок';
     if (category === 'Гипсокартон и листовые') return 'лист';
     return 'шт.';
@@ -182,21 +132,23 @@ function genericCopy(title, category) {
   return `${title} — позиция раздела «${category}». Цена указана за единицу продажи. Перед оплатой менеджер подтвердит наличие и поможет проверить исполнение товара для вашей задачи.`;
 }
 
+const previousCatalog = await read('app/catalog/products.generated.json');
+const previousProducts = new Map(previousCatalog.products.map(p => [p.code, p]));
 const output = [];
+let hiddenByPolicy = 0;
 let hiddenOperationalItems = 0;
-for (const [index, live] of snapshot.products.entries()) {
+for (const live of snapshot.products) {
   if (operationalCodes.has(live.code)) { hiddenOperationalItems++; continue; }
+  if (hiddenCatalogName.test(live.rawName)) { hiddenByPolicy++; continue; }
   if (!(live.available > 0 || live.selectedBySales) || snapshot.stores.length !== 1 || snapshot.stores[0].name !== 'СтроякоV Склад Ростовское шоссе') throw new Error(`Invalid Rostov catalog selection: ${live.code}`);
   if (/поликарбонат|(?:^|\/)ЛАБИНСК(?:\/|$)/i.test(`${live.rawName} ${live.categoryPath}`) || live.archived) throw new Error(`Excluded product: ${live.code}`);
   const original = { ...live, name: live.rawName };
   const entry = curated.get(live.code);
-  const category = ['Гипсокартон','Листовые материалы'].includes(entry?.category) ? 'Гипсокартон и листовые' : entry?.category || categoryFor(original);
+  const { category, subgroup, productKind: kind } = classifyProduct(live);
   const draft = { ...original, code: live.code };
   const baseName = cleanTitle.call(draft, entry?.name || live.rawName, category);
-  const kind = entry?.productKind || productKindFor(original, category);
   const brand = entry?.brand || brandFor(original);
   const name = entry?.name ? baseName : canonicalTitle(baseName, live.rawName, brand);
-  const subgroup = subgroupFor(original, category, kind);
   const image = entry?.image || null;
   if (image) {
     if (!image.startsWith('/assets/products/')) throw new Error('Invalid image path.');
@@ -205,11 +157,11 @@ for (const [index, live] of snapshot.products.entries()) {
     await access(asset);
   }
   output.push({
-    id: live.code, code: live.code, slug: entry?.slug || slugFor(live.code, name),
+    id: live.code, code: live.code, slug: entry?.slug || previousProducts.get(live.code)?.slug || slugFor(live.code, name),
     brand, name, category, subgroup, productKind: kind,
     unit: entry?.unit || unitFor(live, category), image, photoStyle: entry?.photoStyle || 'pending',
     stock: Math.max(0, live.available), price: live.retailPriceMinor === null ? null : live.retailPriceMinor / 100,
-    popularity: snapshot.products.length - index,
+    popularity: popularity.get(live.code) || 0,
     searchAliases: [...new Set([...(entry?.searchAliases || []), live.rawName, live.categoryPath, kind, subgroup])],
     quickDescription: entry?.quickDescription || quickByCategory[category] || `Товар из раздела «${category}». Уточним параметры и совместимость перед заказом.`,
     description: entry?.description || genericCopy(name, category),
@@ -220,10 +172,10 @@ for (const [index, live] of snapshot.products.entries()) {
     comparisonGroup: /штукатур.*гипсов|гипсов.*штукатур/i.test(`${name} ${live.rawName}`) ? 'gypsum-plaster' : kind,
   });
 }
-if (output.length !== snapshot.products.length - hiddenOperationalItems) throw new Error('Catalog count mismatch.');
+if (output.length !== snapshot.products.length - hiddenOperationalItems - hiddenByPolicy) throw new Error('Catalog count mismatch.');
 if (new Set(output.map(product => product.slug)).size !== output.length || new Set(output.map(product => product.id)).size !== output.length) throw new Error('Duplicate routes or ids.');
 output.sort((left, right) => right.popularity - left.popularity);
-await writeFile('app/catalog/products.generated.json', JSON.stringify({ updatedAt: snapshot.completedAt, stockMoment: snapshot.stockMoment, selectedProducts: snapshot.products.length, hiddenOperationalItems, products: output }, null, 2) + '\n');
+await writeFile('app/catalog/products.generated.json', JSON.stringify({ updatedAt: snapshot.completedAt, stockMoment: snapshot.stockMoment, selectedProducts: snapshot.products.length, hiddenOperationalItems, hiddenByPolicy, products: output }, null, 2) + '\n');
 const queue = output.filter(product => !product.image || !curated.has(product.code)).map(product => ({
   code: product.code, name: product.name, category: product.category, productKind: product.productKind,
   needs: [...(!product.image ? ['Оригинал фото производителя', 'Фото в утверждённом стиле'] : []), ...(!curated.has(product.code) ? ['Редакторская проверка названия', 'Источники характеристик', 'SEO-описание'] : []), ...(product.price === null ? ['Уточнить Розница ЛАБ.'] : [])],
