@@ -6496,3 +6496,15 @@ summary:focus-visible {
   .catalog-filters .filter-apply { min-height: 48px; display: block; font-size: 14px; }
   .filter-backdrop { position: fixed; inset: 0; z-index: 105; background: rgba(17, 19, 21, .35); }
 }
+
+@media (min-width: 768px) {
+  .main-navigation, .utility-bar { padding-left: clamp(24px, 4vw, 80px); padding-right: clamp(24px, 4vw, 80px); }
+  .header-search { width: auto; min-width: 0; flex: 1 1 240px; }
+  .header-actions { flex: 0 0 auto; }
+}
+@media (min-width: 768px) and (max-width: 1100px) {
+  .header-actions > button span, .inner-shell .header-actions a span { display: none; }
+  .header-actions > button, .inner-shell .header-actions a { min-width: 32px; }
+  .utility-bar { font-size: 10px; }
+  .utility-bar nav { gap: 12px; }
+}
