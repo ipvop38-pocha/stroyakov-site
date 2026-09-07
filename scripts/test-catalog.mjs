@@ -5,6 +5,11 @@ import { matchesProductSearch } from '../app/lib/product-search.ts';
 const catalog = JSON.parse(await readFile('app/catalog/products.generated.json', 'utf8'));
 const selected = JSON.parse(await readFile('private/moysklad/catalog-frequency.json', 'utf8'));
 const snapshot = JSON.parse(await readFile('private/moysklad/catalog-snapshot.json', 'utf8'));
+assert.equal(selected.products.length, 318, 'Selection must keep the approved 318 SKUs');
+assert.equal(catalog.products.length, 317, 'Only physical products are public');
+assert.equal(catalog.hiddenOperationalItems, 1);
+assert.equal(catalog.products.some(product => product.code === '0545816227'), false, 'Delivery service must stay out of the product grid');
+assert.equal(new Set(catalog.products.map(product => product.category)).size, 13, 'Expanded category directory');
 for (const product of catalog.products) {
   const sale = selected.products.find(p => p.code === product.code);
   const current = snapshot.products.find(p => p.code === product.code);
@@ -13,11 +18,18 @@ for (const product of catalog.products) {
   assert.equal(product.price, current.retailPriceMinor === null ? null : current.retailPriceMinor / 100);
   assert.equal(product.stock, Math.max(0, current.stock - current.reserve));
   assert.equal(matchesProductSearch(product, product.code), true);
-  await access('public' + product.image);
-  for (const forbidden of ['saleCount','soldQuantity','salePrices','retailCurrency','reserve','token','href','categoryPath']) assert.equal(forbidden in product, false, `Private field ${forbidden}`);
+  assert.ok(product.name.length <= 108, `Human title length: ${product.code}`);
+  assert.ok(product.quickDescription);
+  assert.ok(product.description);
+  if (product.image) await access('public' + product.image);
+  for (const forbidden of ['saleCount','soldQuantity','salePrices','retailCurrency','reserve','token','href','categoryPath','sources']) assert.equal(forbidden in product, false, `Private field ${forbidden}`);
 }
 const rusgips = catalog.products.find(p => p.code === '00876');
 assert.ok(rusgips);
+assert.equal(rusgips.name, 'Штукатурка гипсовая Русгипс №6 МН, 30 кг');
+assert.deepEqual(rusgips.companionIds, ['00971','00859','00668']);
+assert.ok(catalog.products.some(product => product.code === '01060' && matchesProductSearch(product, 'шпаклевка сатинтек')));
+assert.ok(catalog.products.some(product => product.code === '00140' && matchesProductSearch(product, 'пгв 12,5')));
 for (const query of ['русгипс 6', 'rusgips штукатурка 30', 'штукатурка машинная', '00876']) assert.ok(matchesProductSearch(rusgips, query), query);
 assert.equal(matchesProductSearch(rusgips, 'русгипс 8'), false);
 assert.equal(calculateProductQuantity(rusgips.calculator, 100, 10, 10), 33);
@@ -31,4 +43,4 @@ assert.equal(productPriceText(null), 'Цена по запросу');
 assert.equal(productStockText({ stock: null, unit: 'мешок' }), 'Наличие уточняется');
 assert.equal(productStockText({ stock: 0, unit: 'мешок' }), 'Уточнить срок поставки');
 assert.equal(productStockText({ stock: 513, unit: 'мешок' }), 'В наличии: 513 мешков');
-console.log(`Catalog verified: ${catalog.products.length} products; retail prices, selection, privacy, assets, search and quantity calculation.`);
+console.log(`Catalog verified: ${catalog.products.length} physical products in 13 categories; selection, retail prices, privacy, optional assets, search and quantity calculation.`);

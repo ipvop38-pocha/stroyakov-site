@@ -1,13 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowRight, Calculator, CaretDown, Check, Heart, Minus, Package, Plus, SealCheck, ShoppingCartSimple, Storefront, Truck } from "@phosphor-icons/react";
+import { ArrowRight, Calculator, CaretDown, Check, FileText, Heart, Minus, Package, Plus, SealCheck, ShoppingCartSimple, Storefront, Truck } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
-import { CatalogProductCard } from "../../components/catalog-product-card";
+import { CatalogProductCard, ProductImage } from "../../components/catalog-product-card";
 import { SiteChrome } from "../../components/site-chrome";
-import { catalogProducts, catalogStockMoment, categoryUrl, CatalogProduct } from "../../catalog/data";
+import { catalogProducts, categoryUrl, CatalogProduct } from "../../catalog/data";
 import { readCart, readFavorites, writeCart, writeFavorites } from "../../lib/commerce";
 import { calculateProductQuantity, productPriceText, productStockText, productQuantityText } from "../../lib/product-presentation";
 
@@ -42,8 +41,8 @@ export default function ProductPage() {
   const calculator = product.calculator;
   const calculated = calculateProductQuantity(calculator, area, reserve, thickness);
   const variants = product.variantGroup ? catalogProducts.filter(item => item.variantGroup === product.variantGroup) : [];
-  const related = catalogProducts.filter(item => item.id !== product.id && item.category === product.category).slice(0, 3);
-  const stockDate = catalogStockMoment.slice(0, 10).split("-").reverse().join(".");
+  const companions = (product.companionIds || []).map(id => catalogProducts.find(item => item.id === id)).filter((item): item is CatalogProduct => Boolean(item)).slice(0, 3);
+  const analogs = product.comparisonGroup ? catalogProducts.filter(item => item.id !== product.id && item.comparisonGroup === product.comparisonGroup).slice(0, 3) : [];
   const hasStock = product.stock !== null && product.stock > 0;
 
   function toggleFavorite() {
@@ -68,19 +67,22 @@ export default function ProductPage() {
     <section className="product-detail-layout">
       <div className="product-gallery-wrap single-photo">
         <div className={`product-gallery ${product.photoStyle === "approved-studio" ? "studio-product-image" : ""}`}>
-          <Image alt={product.name} fill priority sizes="(max-width:767px) 100vw, 50vw" src={product.image}/>
+          <ProductImage product={product} priority sizes="(max-width:767px) 100vw, 50vw"/>
         </div>
         <p className="product-photo-note">Внешний вид упаковки может отличаться в зависимости от партии.</p>
       </div>
       <div className="product-info">
         <div className="product-brand-row"><p className="card-eyebrow">{product.brand}</p><span>Код: {product.code}</span></div>
         <h1>{product.name}</h1>
-        <div className={`product-stock-large ${hasStock ? "" : "stock-unconfirmed"}`}><span/><b>{productStockText(product)}</b><small>Свободный остаток на {stockDate}, {catalogStockMoment.slice(11, 16)} мск. Подтвердим перед оплатой.</small></div>
+        <p className="product-quick-description">{product.quickDescription}</p>
+        <div className={`product-stock-large ${hasStock ? "" : "stock-unconfirmed"}`}><span/><b>{productStockText(product)}</b></div>
         {variants.length > 1 && <div className="product-variants"><b>Толщина и исполнение</b><div>{variants.map(item => <Link className={item.id === product.id ? "is-active" : ""} href={`/product/${item.slug}/`} key={item.id}>{item.variantLabel}</Link>)}</div></div>}
-        <div className="product-price-large"><strong>{productPriceText(product.price)}</strong>{product.oldPrice && <del>{product.oldPrice} ₽</del>}{product.price !== null && <small>/ {product.unit}</small>}</div>
-        <div className="product-buy-row">
-          {product.price !== null ? <><div className="cart-quantity"><button aria-label="Уменьшить" onClick={() => setQuantity(Math.max(1, quantity - 1))} type="button"><Minus/></button><b>{quantity}</b><button aria-label="Увеличить" onClick={() => setQuantity(quantity + 1)} type="button"><Plus/></button></div><button className="primary-inline" onClick={() => add()} type="button">{added ? <>В корзине<Check/></> : <>В корзину<ShoppingCartSimple/></>}</button></> : <Link className="primary-inline" href="/contacts/">Уточнить цену<ArrowRight/></Link>}
-          <button aria-label={favorite ? "Убрать из избранного" : "В избранное"} className={`product-favorite-large ${favorite ? "is-active" : ""}`} onClick={toggleFavorite} type="button"><Heart weight={favorite ? "fill" : "regular"}/></button>
+        <div className="product-purchase-panel">
+          <div className="product-price-large"><strong>{productPriceText(product.price)}</strong>{product.oldPrice && <del>{product.oldPrice} ₽</del>}{product.price !== null && <small>/ {product.unit}</small>}</div>
+          <div className="product-buy-row">
+            {product.price !== null ? <><div className="cart-quantity"><button aria-label="Уменьшить" onClick={() => setQuantity(Math.max(1, quantity - 1))} type="button"><Minus/></button><b>{quantity}</b><button aria-label="Увеличить" onClick={() => setQuantity(quantity + 1)} type="button"><Plus/></button></div><button className="primary-inline" onClick={() => add()} type="button">{added ? <>В корзине<Check/></> : <>В корзину<ShoppingCartSimple/></>}</button></> : <Link className="primary-inline" href="/contacts/">Уточнить цену<ArrowRight/></Link>}
+            <button aria-label={favorite ? "Убрать из избранного" : "В избранное"} className={`product-favorite-large ${favorite ? "is-active" : ""}`} onClick={toggleFavorite} type="button"><Heart weight={favorite ? "fill" : "regular"}/></button>
+          </div>
         </div>
         {added && <button className="go-cart" onClick={() => router.push("/cart/")} type="button">Перейти в корзину<ArrowRight/></button>}
         {calculator && <>
@@ -99,10 +101,14 @@ export default function ProductPage() {
     <section className="product-content">
       <div className="product-tabs"><button className={tab === "description" ? "is-active" : ""} onClick={() => setTab("description")} type="button">Описание</button><button className={tab === "specs" ? "is-active" : ""} onClick={() => setTab("specs")} type="button">Характеристики</button></div>
       {tab === "description" ? <div className="product-description"><div><p className="eyebrow">О товаре</p><h2>Для каких работ подходит</h2><p>{product.description}</p><ul><li><Check/>Проверим наличие перед оплатой</li><li><Check/>Подберём сопутствующие материалы</li><li><Check/>Поможем рассчитать доставку на объект</li></ul></div><aside><Package/><b>Комплектуем под задачу</b><p>Подберём совместимые материалы и проверим наличие перед оплатой.</p><Link href="/business/assembly/">Помочь с комплектом<ArrowRight/></Link></aside></div> : <div className="product-specs"><div><p className="eyebrow">Характеристики</p><h2>Основные параметры</h2></div><dl>{product.specs?.map(([name, value]) => <div key={name}><dt>{name}</dt><dd>{value}</dd></div>)}<div><dt>Бренд</dt><dd>{product.brand}</dd></div><div><dt>Единица продажи</dt><dd>{product.unit}</dd></div></dl></div>}
-      {!!product.sources?.length && <p className="product-source-links">Информация производителя: {product.sources.map(source => <a href={source.url} target="_blank" rel="noopener noreferrer" key={source.url}>{source.label}<ArrowRight/></a>)}</p>}
     </section>
     <section className="product-receiving"><div><p className="eyebrow">Получение товара</p><h2>Выберите удобный способ</h2></div><div className="receiving-grid"><article><span><Truck weight="bold"/></span><h3>Доставка на объект</h3><p>Подберём машину по объёму заказа и согласуем интервал.</p><Link href="/delivery/">Условия доставки<ArrowRight/></Link></article><article><span><Storefront weight="bold"/></span><h3>Самовывоз со склада</h3><p>Подготовим заказ к приезду и проверим комплектность.</p><Link href="/contacts/">Как нас найти<ArrowRight/></Link></article><article><span><SealCheck weight="bold"/></span><h3>Проверка заказа</h3><p>Менеджер подтвердит остатки и замены до оплаты.</p><Link href="/business/assembly/">Комплектация<ArrowRight/></Link></article></div></section>
-    <section className="product-documents"><div><p className="eyebrow">Документы</p><h2>Документы по товару</h2><p>Уточним наличие паспорта качества и документов о соответствии для актуальной партии.</p></div><Link className="primary-inline" href="/contacts/">Запросить документы<ArrowRight/></Link></section>
-    {related.length > 0 && <section className="related-products"><div className="section-heading-row"><div><p className="eyebrow">Похожие позиции</p><h2>Сравните варианты</h2></div><Link href={categoryUrl(product.category)}>Смотреть категорию<ArrowRight/></Link></div><div className="catalog-product-grid">{related.map(item => <CatalogProductCard added={relatedAdded.includes(item.id)} favorite={relatedFavorites.includes(item.id)} key={item.id} onAdd={() => add(item, 1)} onFavorite={() => { const ids = readFavorites(); const next = ids.includes(item.id) ? ids.filter(id => id !== item.id) : [...ids, item.id]; setRelatedFavorites(next); writeFavorites(next); }} product={item}/>)}</div></section>}
+    <section className="product-documents"><div className="document-visual"><FileText weight="duotone"/><span><b>Документы к партии</b><small>Паспорт качества<br/>Документы о соответствии</small></span></div><div><p className="eyebrow">Документы</p><h2>Документы по товару</h2><p>Запросим у поставщика документы именно для актуальной партии и отправим вместе с подтверждением заказа.</p><Link className="primary-inline" href="/contacts/">Запросить документы<ArrowRight/></Link></div></section>
+    {companions.length > 0 && <ProductRecommendations title="С этим товаром покупают" eyebrow="Для монтажа" items={companions} category={product.category} added={relatedAdded} favorites={relatedFavorites} onAdd={add} onFavorites={setRelatedFavorites}/>}
+    {analogs.length > 0 && <ProductRecommendations title="Аналоги для сравнения" eyebrow="Похожие позиции" items={analogs} category={product.category} added={relatedAdded} favorites={relatedFavorites} onAdd={add} onFavorites={setRelatedFavorites}/>}
   </div></SiteChrome>;
+}
+
+function ProductRecommendations({ title, eyebrow, items, category, added, favorites, onAdd, onFavorites }: { title: string; eyebrow: string; items: CatalogProduct[]; category: string; added: string[]; favorites: string[]; onAdd: (item: CatalogProduct, count: number) => void; onFavorites: (ids: string[]) => void }) {
+  return <section className="related-products"><div className="section-heading-row"><div><p className="eyebrow">{eyebrow}</p><h2>{title}</h2></div><Link href={categoryUrl(category)}>Смотреть категорию<ArrowRight/></Link></div><div className="catalog-product-grid">{items.map(item => <CatalogProductCard added={added.includes(item.id)} favorite={favorites.includes(item.id)} key={item.id} onAdd={() => onAdd(item, 1)} onFavorite={() => { const ids = readFavorites(); const next = ids.includes(item.id) ? ids.filter(id => id !== item.id) : [...ids, item.id]; onFavorites(next); writeFavorites(next); }} product={item}/>)}</div></section>;
 }

@@ -25,6 +25,7 @@ import {
 } from "@phosphor-icons/react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { catalogProducts, CatalogProduct as Product } from "./catalog/data";
+import { ProductImage } from "./components/catalog-product-card";
 import { productPriceText, productStockText } from "./lib/product-presentation";
 import { matchesProductSearch } from "./lib/product-search";
 import { readCart, readFavorites, writeCart, writeFavorites } from "./lib/commerce";
@@ -153,7 +154,7 @@ function ProductCard({ product, favorite, onFavorite, onAdd }: {
         >
           <Heart aria-hidden weight={favorite ? "fill" : "regular"} />
         </button>
-        <Link href={`/product/${product.slug}/`}><Image alt={product.name} fill sizes="(max-width: 767px) 294px, 244px" src={product.image} /></Link>
+        <Link href={`/product/${product.slug}/`}><ProductImage product={product} sizes="(max-width: 767px) 294px, 244px" /></Link>
       </div>
       <div className="product-copy">
         <p className="product-brand">{product.brand}</p>
