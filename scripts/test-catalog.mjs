@@ -21,6 +21,7 @@ for (const product of catalog.products) {
   assert.ok(product.name.length <= 108, `Human title length: ${product.code}`);
   assert.ok(product.quickDescription);
   assert.ok(product.description);
+  assert.ok(product.subgroup);
   if (product.image) await access('public' + product.image);
   for (const forbidden of ['saleCount','soldQuantity','salePrices','retailCurrency','reserve','token','href','categoryPath','sources']) assert.equal(forbidden in product, false, `Private field ${forbidden}`);
 }
@@ -30,6 +31,10 @@ assert.equal(rusgips.name, 'Штукатурка гипсовая Русгипс
 assert.deepEqual(rusgips.companionIds, ['00971','00859','00668']);
 assert.ok(catalog.products.some(product => product.code === '01060' && matchesProductSearch(product, 'шпаклевка сатинтек')));
 assert.ok(catalog.products.some(product => product.code === '00140' && matchesProductSearch(product, 'пгв 12,5')));
+assert.equal(catalog.products.find(product => product.code === '00178')?.name, 'Диск отрезной по металлу 125×1,0×22,2 мм Кратон');
+assert.equal(catalog.products.find(product => product.code === '0545816237')?.name, 'Диск отрезной по металлу 125×1,2×22,2 мм Bivol');
+assert.equal(catalog.products.find(product => product.code === '01680')?.subgroup, 'Саморезы');
+assert.match(catalog.products.find(product => product.code === '01769')?.name || '', /с саморезом/i);
 for (const query of ['русгипс 6', 'rusgips штукатурка 30', 'штукатурка машинная', '00876']) assert.ok(matchesProductSearch(rusgips, query), query);
 assert.equal(matchesProductSearch(rusgips, 'русгипс 8'), false);
 assert.equal(calculateProductQuantity(rusgips.calculator, 100, 10, 10), 33);
@@ -41,6 +46,6 @@ assert.equal(calculateProductQuantity(undefined, 12, 10, 10), null);
 assert.equal(calculateProductQuantity(rusgips.calculator, 0, 10, 10), null);
 assert.equal(productPriceText(null), 'Цена по запросу');
 assert.equal(productStockText({ stock: null, unit: 'мешок' }), 'Наличие уточняется');
-assert.equal(productStockText({ stock: 0, unit: 'мешок' }), 'Уточнить срок поставки');
+assert.equal(productStockText({ stock: 0, unit: 'мешок' }), 'Под заказ');
 assert.equal(productStockText({ stock: 513, unit: 'мешок' }), 'В наличии: 513 мешков');
 console.log(`Catalog verified: ${catalog.products.length} physical products in 13 categories; selection, retail prices, privacy, optional assets, search and quantity calculation.`);

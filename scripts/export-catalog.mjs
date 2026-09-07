@@ -15,13 +15,13 @@ const categoryRules = [
   ['Металлопрокат', /\(В\) МЕТАЛЛ|АРМАТУР|ТРУБЫ|УГОЛКИ|ШВЕЛЛЕР|ЛИСТЫ Г\/К|ПРОВОЛОКА/i],
   ['Гипсокартон и листовые', /ГИПСОКАРТОН|\bПГ[ОВ]\b|\bГСП\b|\bOSB\b|\bОС[БП]\b|ШИФЕР/i],
   ['Крепёж', /КРЕПЕЖ|КРЕПЁЖ|САМОРЕЗ|ДЮБЕЛ|ХОМУТ/i],
+  ['Профили и комплектующие', /ПРОФИЛЬ|ПОДВЕС|МАЯЧК|\bМАЯК\b|УГОЛОК ПВХ|ЗАГЛУШК/i],
   ['Инструмент и расходники', /СОПУТКА|ПЕРЧАТК|ЛЕНТ|СЕТК|КИСТ|ВАЛИК|КРУГИ|ШПАТЕЛ|КАРАНДАШ|ЧЕРЕНОК|ТАЗ СТРОИТЕЛЬНЫЙ|ПЛЕНКА|ПЛЁНКА/i],
   ['Сухие смеси', /ШТУКАТУР|ШПАКЛ|ШПАТЛ|ПЛИТОЧНЫЙ КЛЕЙ|КЛЕЙ ДЛЯ ПЛИТКИ|НАЛИВНОЙ ПОЛ|СТЯЖК|РОВНИТЕЛ|КЛАДКА И МОНТАЖ|МОНТАЖНЫЙ КЛЕЙ|\bЦПС\b|САТИНТЕК|ВЯЖУЩЕЕ ГИПСОВОЕ|ГИПС СТРОИТЕЛЬНЫЙ/i],
   ['Утеплители', /ПЕНОПЛЭКС|ИЗОЛАЙФ|УТЕПЛ|ПОДЛОЖК/i],
   ['Гидроизоляция и кровля', /ГИДРОИЗОЛ|БИПОЛЬ|УНИФЛЕКС|ПРАЙМЕР БИТУМ/i],
   ['Пены и герметики', /ПЕНА|ГЕРМЕТИК/i],
   ['ЛКМ и грунтовки', /ГРУНТ|КРАСК|ЛАК|ЭМАЛ/i],
-  ['Профили и комплектующие', /ПРОФИЛЬ|ПОДВЕС|МАЯЧК/i],
   ['Стеновые материалы', /БЛОКИ|КИРПИЧ/i],
   ['Цемент', /ЦЕМЕНТ/i],
 ];
@@ -45,6 +45,43 @@ function productKindFor(product, category) {
     ['Арматура', /АРМАТУР/i], ['Трубы', /ТРУБ/i], ['Саморезы', /САМОРЕЗ/i],
   ];
   return rules.find(([, pattern]) => pattern.test(text))?.[0] || category;
+}
+
+function subgroupFor(product, category, kind) {
+  const text = `${product.categoryPath} ${product.name}`;
+  const rules = {
+    'Крепёж': [['Дюбели', /ДЮБЕЛ/i], ['Саморезы', /САМОРЕЗ|ШУРУП/i], ['Хомуты', /ХОМУТ/i], ['Анкеры', /АНКЕР/i]],
+    'Инструмент и расходники': [['Отрезные диски', /КРУГ ОТРЕЗ|ДИСК ОТР/i], ['Сетки и ленты', /СЕТК|ЛЕНТ/i], ['Малярный инструмент', /КИСТ|ВАЛИК|КАРАНДАШ/i], ['Шпатели и правила', /ШПАТЕЛ|ПРАВИЛ/i], ['Средства защиты', /ПЕРЧАТК/i], ['Ёмкости', /ВЕДРО|ТАЗ|ЕМКОСТ/i], ['Плёнки и мешки', /ПЛЕНК|ПЛЁНК|МЕШК/i], ['Ножи и лезвия', /НОЖ|ЛЕЗВИ/i], ['Сварочные материалы', /ЭЛЕКТРОД/i], ['Ручной инструмент', /ЧЕРЕНОК|ЛОПАТ|ТЯПК/i]],
+    'Профили и комплектующие': [['Маяки', /МАЯЧК|\bМАЯК\b/i], ['Уголки', /УГОЛОК ПВХ|ПРОФИЛЬ УГЛОВОЙ/i], ['Подвесы', /ПОДВЕС/i], ['Заглушки', /ЗАГЛУШК/i], ['Потолочные профили', /ПОТОЛОЧН|\bПП\b|\bППН\b/i], ['Стеновые профили', /СТЕНОВОЙ|\bПС\b|\bПН\b/i]],
+    'Металлопрокат': [['Арматура', /АРМАТУР/i], ['Трубы', /ТРУБ/i], ['Уголки', /УГОЛ/i], ['Швеллеры', /ШВЕЛЛЕР/i], ['Листовой металл', /ЛИСТ/i], ['Проволока', /ПРОВОЛОК/i]],
+    'ЛКМ и грунтовки': [['Грунтовки', /ГРУНТ/i], ['Краски', /КРАСК/i], ['Эмали и лаки', /ЭМАЛ|ЛАК/i]],
+    'Гидроизоляция и кровля': [['Рулонная кровля', /БИПОЛЬ|УНИФЛЕКС|МЕМБРАН/i], ['Мастики и праймеры', /МАСТИК|ПРАЙМЕР/i], ['Гидроизоляционные смеси', /ГИДРОИЗОЛ/i]],
+    'Пены и герметики': [['Монтажные пены', /ПЕНА/i], ['Герметики', /ГЕРМЕТИК/i]],
+    'Утеплители': [['XPS', /ПЕНОПЛЭКС|\bXPS\b/i], ['Минеральная вата', /IZOLIFE|ИЗОЛАЙФ|МИНЕРАЛ/i], ['Подложки', /ПОДЛОЖК/i]],
+    'Гипсокартон и листовые': [['Гипсокартон', /ГИПСОКАРТОН|\bПГ[ОВ]\b|\bГСП\b/i], ['OSB', /\bOSB\b|\bОС[БП]\b/i], ['Шифер', /ШИФЕР/i]],
+    'Стеновые материалы': [['Блоки', /БЛОК/i], ['Кирпич', /КИРПИЧ/i]],
+    'Сухие смеси': [['Штукатурки', /ШТУКАТУР/i], ['Шпаклёвки', /ШПАКЛ|ШПАТЛ|САТИНТЕК/i], ['Плиточные клеи', /КЛЕЙ.*ПЛИТ|ПЛИТОЧНЫЙ КЛЕЙ/i], ['Смеси для пола', /ПОЛ|СТЯЖК|РОВНИТЕЛ|НИВЕЛИР/i], ['Кладочные и монтажные смеси', /КЛАДК|МОНТАЖ|\bЦПС\b|\bМ-?150\b|\bМ-?300\b/i]],
+  };
+  return rules[category]?.find(([, pattern]) => pattern.test(text))?.[0] || kind;
+}
+
+function canonicalTitle(title, raw, brand) {
+  const dimensionSource = raw.replace(/Т\d+\s*[-–]\s*/i, '');
+  const dimension = dimensionSource.match(/(\d{2,3}(?:[.,]\d+)?)\s*[-*xх×]\s*(\d+(?:[.,]\d+)?)\s*[-*xх×]\s*(\d+(?:[.,]\d+)?)/i);
+  const dimensions = dimension ? `${dimension[1]}×${dimension[2]}×${dimension[3]} мм`.replace(/\./g, ',') : '';
+  const count = raw.match(/(?:\(|<|в\s*уп\.?\s*)?\s*(\d{2,4})\s*шт/i)?.[1];
+  if (/КРУГ\s+ОТРЕЗ|ДИСК\s+ОТР/i.test(raw)) {
+    const diskBrand = /BIVOL/i.test(raw) ? 'Bivol' : /КРАТОН/i.test(raw) ? 'Кратон' : /MAXI\s*TOOL/i.test(raw) ? 'MaxiTool' : brand;
+    return ['Диск отрезной по металлу', dimensions, diskBrand].filter(Boolean).join(' ');
+  }
+  if (/^(?:САМОРЕЗ|ШУРУП)/i.test(raw)) {
+    const screwDimension = raw.match(/(\d+(?:[.,]\d+)?)\s*[*xх×]\s*(\d+(?:[.,]\d+)?)/i);
+    const size = screwDimension ? `${screwDimension[1]}×${screwDimension[2]} мм` : raw.match(/\b(\d{2,3})\b/)?.[1] ? `${raw.match(/\b(\d{2,3})\b/)?.[1]} мм` : '';
+    const purpose = /кров/i.test(raw) ? 'Саморез кровельный' : /шест/i.test(raw) ? 'Саморез с шестигранной головкой' : /ГКЛ|металл/i.test(raw) ? 'Саморез по металлу' : 'Саморез';
+    const screwBrand = /КНАУФ|KNAUF/i.test(raw) ? 'Knauf' : brand;
+    return [purpose, size, screwBrand, count ? `${count} шт.` : ''].filter(Boolean).join(', ').replace(', ,', ',');
+  }
+  return title.replace(/с шурупом/gi, 'с саморезом');
 }
 
 function cleanTitle(raw, category) {
@@ -156,8 +193,11 @@ for (const original of selection.products) {
   const entry = curated.get(original.code);
   const category = ['Гипсокартон','Листовые материалы'].includes(entry?.category) ? 'Гипсокартон и листовые' : entry?.category || categoryFor(original);
   const draft = { ...original, code: original.code };
-  const name = cleanTitle.call(draft, entry?.name || live.rawName, category);
+  const baseName = cleanTitle.call(draft, entry?.name || live.rawName, category);
   const kind = entry?.productKind || productKindFor(original, category);
+  const brand = entry?.brand || brandFor(original);
+  const name = entry?.name ? baseName : canonicalTitle(baseName, live.rawName, brand);
+  const subgroup = subgroupFor(original, category, kind);
   const image = entry?.image || null;
   if (image) {
     if (!image.startsWith('/assets/products/')) throw new Error('Invalid image path.');
@@ -167,7 +207,7 @@ for (const original of selection.products) {
   }
   output.push({
     id: original.code, code: original.code, slug: entry?.slug || slugFor(original.code, name),
-    brand: entry?.brand || brandFor(original), name, category, productKind: kind,
+    brand, name, category, subgroup, productKind: kind,
     unit: entry?.unit || unitFor(live, category), image, photoStyle: entry?.photoStyle || 'pending',
     stock: live.available, price: live.retailPriceMinor === null ? null : live.retailPriceMinor / 100,
     popularity: selection.products.length - selection.products.findIndex(product => product.code === original.code),

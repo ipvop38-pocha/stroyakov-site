@@ -166,9 +166,7 @@ function ProductCard({ product, favorite, onFavorite, onAdd }: {
           {product.price !== null && <small>/ {product.unit}</small>}
         </div>
       </div>
-      <button className="add-button" onClick={onAdd} type="button">
-        {product.price === null ? "Уточнить цену" : "В корзину"} <ShoppingCartSimple aria-hidden weight="bold" />
-      </button>
+      {product.price === null ? <Link className="add-button order-request" href={`/contacts/?product=${product.slug}`}>Уточнить цену<ArrowRight aria-hidden weight="bold"/></Link> : product.stock === null || product.stock <= 0 ? <Link className="add-button order-request" href={`/contacts/?product=${product.slug}`}>Под заказ<ArrowRight aria-hidden weight="bold"/></Link> : <button className="add-button" onClick={onAdd} type="button">В корзину<ShoppingCartSimple aria-hidden weight="bold"/></button>}
     </article>
   );
 }
@@ -220,7 +218,7 @@ export default function Home() {
   }
 
   function addProduct(product: Product) {
-    if (product.price === null) { window.location.href = "/contacts/"; return; }
+    if (product.price === null || product.stock === null || product.stock <= 0) { window.location.href = `/contacts/?product=${product.slug}`; return; }
     const price = product.price;
     setCartCount((count) => count + 1);
     setCartTotal((total) => total + price);

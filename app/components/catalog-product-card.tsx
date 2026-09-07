@@ -24,6 +24,6 @@ export function CatalogProductCard({ product, favorite, onFavorite, onAdd, added
       <span className={product.stock && product.stock > 0 ? '' : 'stock-unconfirmed'}><i/>{productStockText(product)}</span>
       <div><strong>{productPriceText(product.price)}</strong>{product.oldPrice && <del>{product.oldPrice} ₽</del>}{product.price !== null && <small>/ {product.unit}</small>}</div>
     </div>
-    {product.price !== null ? <button className={`catalog-add ${added ? 'is-added' : ''}`} onClick={onAdd} type="button">{added ? <>В корзине<Check weight="bold"/></> : <>В корзину<ShoppingCartSimple weight="bold"/></>}</button> : <Link className="catalog-add" href="/contacts/">Уточнить цену</Link>}
+    {product.price === null ? <Link className="catalog-add order-request" href={`/contacts/?product=${product.slug}`}>Уточнить цену</Link> : product.stock === null || product.stock <= 0 ? <Link className="catalog-add order-request" href={`/contacts/?product=${product.slug}`}>Под заказ<ShoppingCartSimple weight="bold"/></Link> : <button className={`catalog-add ${added ? 'is-added' : ''}`} onClick={onAdd} type="button">{added ? <>В корзине<Check weight="bold"/></> : <>В корзину<ShoppingCartSimple weight="bold"/></>}</button>}
   </article>;
 }
