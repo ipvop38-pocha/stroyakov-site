@@ -8,7 +8,8 @@
     "start": "next start",
     "catalog:refresh": "node scripts/moysklad-rostov-stock.mjs",
     "catalog:export": "node scripts/export-catalog.mjs",
-    "catalog:check": "node --experimental-strip-types scripts/test-catalog.mjs"
+    "catalog:check": "node --experimental-strip-types scripts/test-catalog.mjs",
+    "catalog:facets:check": "node --experimental-strip-types scripts/test-catalog-facets.mjs"
   },
   "dependencies": {
     "@fontsource/golos-text": "^5.3.0",

@@ -2,10 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, CheckCircle } from "@phosphor-icons/react";
+import { ArrowRight } from "@phosphor-icons/react";
 import { SiteChrome } from "../components/site-chrome";
 import { masterKits, solutionCards } from "./data";
-import { warehouseSnapshot } from "../data/warehouse-snapshot";
 
 export default function SolutionsPage() {
   return <SiteChrome>
@@ -15,7 +14,6 @@ export default function SolutionsPage() {
         <p className="eyebrow">Расчёт, система, совместимость</p>
         <h1>Готовые решения<br />под вашу задачу</h1>
         <p>Выберите строительную задачу или набор мастера. Комплектуем только совместимые позиции и разрешаем заменить любой товар аналогом.</p>
-        <div className="trust-line"><CheckCircle aria-hidden weight="fill" /> Остатки и отгрузки сверены по МоемуСкладу на {warehouseSnapshot.capturedAt}</div>
       </section>
 
       <section className="inner-section">
