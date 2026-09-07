@@ -11,6 +11,7 @@ import { catalogCategories, catalogProducts, CatalogProduct, categoryMap } from 
 import { matchesProductSearch } from "../lib/product-search";
 
 const categorySlugMap = Object.fromEntries(Object.entries(categoryMap).map(([slug, name]) => [name, slug]));
+const availableCategories = catalogCategories.filter(item => catalogProducts.some(product => product.category === item.name));
 type Availability = "all" | "stock" | "order";
 
 export default function CatalogPage() {
@@ -23,6 +24,7 @@ export default function CatalogPage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [availability, setAvailability] = useState<Availability>("all");
   const [brands, setBrands] = useState<string[]>([]);
+  const [showAllBrands, setShowAllBrands] = useState(false);
   const [visibleCount, setVisibleCount] = useState(24);
 
   useEffect(() => {
@@ -36,6 +38,14 @@ export default function CatalogPage() {
   }, []);
 
   const categorySubgroups = useMemo(() => category === "Все товары" ? [] : [...new Set(catalogProducts.filter(product => product.category === category).map(product => product.subgroup))], [category]);
+  const allBrands = useMemo(() => {
+    const products = category === "Все товары" ? catalogProducts : catalogProducts.filter(product => product.category === category);
+    return [...new Set(products.map(product => product.brand).filter(Boolean))].sort((left, right) => {
+    const count = (brand: string) => products.filter(product => product.brand === brand).length;
+    return count(right) - count(left) || left.localeCompare(right, "ru");
+    });
+  }, [category]);
+  const visibleBrands = showAllBrands ? allBrands : allBrands.slice(0, 7);
   const filtered = useMemo(() => catalogProducts.filter(product =>
     (category === "Все товары" || product.category === category) &&
     (subgroup === "Все подгруппы" || product.subgroup === subgroup) &&
@@ -52,7 +62,7 @@ export default function CatalogPage() {
     if (query) url.searchParams.set("q", query); else url.searchParams.delete("q");
     url.hash = "products"; history.replaceState(null, "", url);
   }
-  function chooseCategory(name: string) { setCategory(name); setSubgroup("Все подгруппы"); setFiltersOpen(false); updateUrl(name, "Все подгруппы"); window.setTimeout(() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0); }
+  function chooseCategory(name: string) { setCategory(name); setSubgroup("Все подгруппы"); setBrands([]); setShowAllBrands(false); setFiltersOpen(false); updateUrl(name, "Все подгруппы"); window.setTimeout(() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0); }
   function chooseSubgroup(name: string) { setSubgroup(name); updateUrl(category, name); }
   function chooseAvailability(value: Availability) { const next = availability === value ? "all" : value; setAvailability(next); updateUrl(category, subgroup, next); }
   function toggleFavorite(id: string) { setFavorites(current => { const next = current.includes(id) ? current.filter(item => item !== id) : [...current, id]; writeFavorites(next); return next; }); }
@@ -62,18 +72,18 @@ export default function CatalogPage() {
     writeCart(existing ? current.map(item => item.id === id ? { ...item, quantity: item.quantity + 1 } : item) : [...current, { id, title: product.name, price: product.price, quantity: 1, image: product.image, detail: `${product.brand} · ${product.unit}` }]);
     setAdded(value => [...new Set([...value, product.id])]);
   }
-  function resetFilters() { setCategory("Все товары"); setSubgroup("Все подгруппы"); setQuery(""); setBrands([]); setAvailability("all"); updateUrl("Все товары", "Все подгруппы", "all"); }
+  function resetFilters() { setCategory("Все товары"); setSubgroup("Все подгруппы"); setQuery(""); setBrands([]); setShowAllBrands(false); setAvailability("all"); updateUrl("Все товары", "Все подгруппы", "all"); }
 
   return <SiteChrome active="catalog"><div className="inner-canvas catalog-page">
     <nav aria-label="Хлебные крошки" className="breadcrumbs"><Link href="/">Главная</Link><span>/</span><span>Каталог</span></nav>
     <section className="catalog-heading"><div><p className="eyebrow">Строительные материалы</p><h1>Каталог</h1><p>Подберите материалы по задаче. Наличие и стоимость подтвердим перед оплатой.</p></div></section>
-    <section className="category-directory"><div className="directory-heading"><div><SquaresFour weight="bold"/><span><b>Каталог категорий</b><small>13 направлений из актуального ассортимента</small></span></div><Link href="/solutions/">Подобрать готовое решение</Link></div><div className="directory-grid">{catalogCategories.map(item => { const count = catalogProducts.filter(product => product.category === item.name).length; return <Link className="directory-card" href={`/catalog/?category=${item.slug}#products`} key={item.slug} onClick={event => { event.preventDefault(); chooseCategory(item.name); }}><span className="directory-card-image"><Image alt="" fill sizes="110px" src={item.image}/></span><div><b>{item.name}</b><small>{item.note}</small><em>{count} товаров</em></div></Link>; })}</div></section>
+    <section className="category-directory"><div className="directory-heading"><div><SquaresFour weight="bold"/><span><b>Каталог категорий</b><small>{availableCategories.length} направлений с остатком на Ростовском шоссе</small></span></div><Link href="/solutions/">Подобрать готовое решение</Link></div><div className="directory-grid">{availableCategories.map(item => { const count = catalogProducts.filter(product => product.category === item.name).length; return <Link className="directory-card" href={`/catalog/?category=${item.slug}#products`} key={item.slug} onClick={event => { event.preventDefault(); chooseCategory(item.name); }}><span className="directory-card-image"><Image alt="" fill sizes="110px" src={item.image}/></span><div><b>{item.name}</b><small>{item.note}</small><em>{count} товаров</em></div></Link>; })}</div></section>
     <div className="catalog-section-head" id="products"><div><p className="eyebrow">Товарная выдача</p><h2>{category}</h2>{query && <button onClick={() => setQuery("")} type="button">По запросу «{query}» <X/></button>}</div><div className="catalog-head-actions"><button className="mobile-filter-button" onClick={() => setFiltersOpen(true)} type="button"><Faders weight="bold"/>Фильтры</button><label>Сортировка<select onChange={event => setSort(event.target.value)} value={sort}><option value="popular">По популярности</option><option value="price-asc">Сначала дешевле</option><option value="price-desc">Сначала дороже</option></select><CaretDown/></label></div></div>
     {categorySubgroups.length > 1 && <div className="subcategory-strip" aria-label="Подгруппы"><button className={subgroup === "Все подгруппы" ? "is-active" : ""} onClick={() => chooseSubgroup("Все подгруппы")} type="button">Все</button>{categorySubgroups.map(item => <button className={subgroup === item ? "is-active" : ""} key={item} onClick={() => chooseSubgroup(item)} type="button">{item}<span>{catalogProducts.filter(product => product.category === category && product.subgroup === item).length}</span></button>)}</div>}
     <div className="catalog-layout"><aside className={`catalog-filters ${filtersOpen ? "is-open" : ""}`}><button aria-label="Закрыть фильтры" className="filter-close" onClick={() => setFiltersOpen(false)} type="button"><X/></button><h2>Фильтры</h2>
       <div className="filter-group"><b>Категория</b>{["Все товары", ...new Set(catalogProducts.map(product => product.category))].map(item => <button className={category === item ? "is-active" : ""} key={item} onClick={() => chooseCategory(item)} type="button"><span/>{item}<em>{item === "Все товары" ? catalogProducts.length : catalogProducts.filter(product => product.category === item).length}</em></button>)}</div>
       <div className="filter-group"><b>Наличие</b><button className={availability === "stock" ? "is-active" : ""} onClick={() => chooseAvailability("stock")} type="button"><span/>В наличии</button><button className={availability === "order" ? "is-active" : ""} onClick={() => chooseAvailability("order")} type="button"><span/>Под заказ</button></div>
-      <div className="filter-group"><b>Бренды</b>{[...new Set(catalogProducts.map(product => product.brand).filter(Boolean))].map(item => <button className={brands.includes(item) ? "is-active" : ""} key={item} onClick={() => setBrands(current => current.includes(item) ? current.filter(brand => brand !== item) : [...current, item])} type="button"><span/>{item}</button>)}</div>
+      <div className="filter-group"><b>Бренды</b>{visibleBrands.map(item => <button className={brands.includes(item) ? "is-active" : ""} key={item} onClick={() => setBrands(current => current.includes(item) ? current.filter(brand => brand !== item) : [...current, item])} type="button"><span/>{item}</button>)}{allBrands.length > 7 && <button className={`brand-list-toggle ${showAllBrands ? "is-open" : ""}`} onClick={() => setShowAllBrands(value => !value)} type="button">{showAllBrands ? "Скрыть бренды" : `Показать все бренды · ${allBrands.length}`}<CaretDown/></button>}</div>
       <div className="filter-note"><b>Остатки Краснодар</b><p>Наличие и итоговую стоимость подтвердим перед отгрузкой.</p></div>
     </aside><section className="catalog-results"><div className="catalog-result-meta"><span>{filtered.length} позиции</span><small>Цены указаны за единицу товара</small></div>{filtered.length ? <><div className="catalog-product-grid">{filtered.slice(0, visibleCount).map(product => <CatalogProductCard added={added.includes(product.id)} favorite={favorites.includes(product.id)} key={product.id} onAdd={() => addProduct(product)} onFavorite={() => toggleFavorite(product.id)} product={product}/>)}</div>{visibleCount < filtered.length && <button className="catalog-load-more" onClick={() => setVisibleCount(count => count + 24)} type="button">Показать ещё 24 товара</button>}</> : <div className="catalog-empty"><h2>Товары не найдены</h2><p>Попробуйте другой запрос или сбросьте фильтры. Если нужного товара пока нет в каталоге, поможем подобрать его по заявке.</p><button onClick={resetFilters} type="button">Показать доступные товары</button></div>}</section></div>
   </div></SiteChrome>;

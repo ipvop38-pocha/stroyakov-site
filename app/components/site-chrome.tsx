@@ -15,15 +15,21 @@ import {
   User,
   X,
 } from "@phosphor-icons/react";
-import { FormEvent, ReactNode, useEffect, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import { catalogProducts } from "../catalog/data";
 import { COMMERCE_CHANGE_EVENT, readCommerceSummary } from "../lib/commerce";
+import { productPriceText, productStockText } from "../lib/product-presentation";
+import { matchesProductSearch } from "../lib/product-search";
 
 export function SiteChrome({ children, active = "" }: { children: ReactNode; active?: string }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const [commerce, setCommerce] = useState({ cartCount: 0, cartTotal: 0, favoritesCount: 0 });
+  const suggestions = useMemo(() => query.trim() ? catalogProducts.filter(product => matchesProductSearch(product, query)).slice(0, 5) : [], [query]);
 
   useEffect(() => {
+    setQuery(new URL(window.location.href).searchParams.get("q") || "");
     const refresh = () => setCommerce(readCommerceSummary());
     refresh();
     window.addEventListener(COMMERCE_CHANGE_EVENT, refresh);
@@ -40,6 +46,11 @@ export function SiteChrome({ children, active = "" }: { children: ReactNode; act
     event.preventDefault();
     const value = query.trim();
     window.location.href = value ? `/catalog/?q=${encodeURIComponent(value)}` : "/catalog/";
+  }
+
+  function SearchSuggestions() {
+    if (!searchOpen || !query.trim()) return null;
+    return <div className="search-results">{suggestions.length ? suggestions.map(product => <button key={product.id} onMouseDown={() => { window.location.href = `/product/${product.slug}/`; }} type="button"><span><b>{product.name}</b><small>{product.brand || product.category} · {productStockText(product)}</small></span><strong>{productPriceText(product.price)}</strong></button>) : <p>По вашему запросу ничего не найдено</p>}</div>;
   }
 
   return (
@@ -62,7 +73,8 @@ export function SiteChrome({ children, active = "" }: { children: ReactNode; act
           <Link className="catalog-button" href="/catalog/">Каталог <List aria-hidden weight="bold" /></Link>
           <form className="header-search" onSubmit={submitSearch}>
             <MagnifyingGlass aria-hidden weight="bold" />
-            <input aria-label="Поиск по каталогу" onChange={(event) => setQuery(event.target.value)} placeholder="Найти товар, бренд или категорию" value={query} />
+            <input aria-label="Поиск по каталогу" onBlur={() => window.setTimeout(() => setSearchOpen(false), 120)} onChange={(event) => { setQuery(event.target.value); setSearchOpen(true); }} onFocus={() => setSearchOpen(true)} placeholder="Найти товар, бренд или категорию" value={query} />
+            <SearchSuggestions />
           </form>
           <div className="header-actions">
             <Link aria-label="Войти в личный кабинет" href="/account/"><User aria-hidden /><span><small>Профиль</small><b>Войти</b></span></Link>
@@ -74,7 +86,8 @@ export function SiteChrome({ children, active = "" }: { children: ReactNode; act
         </div>
         <form className="mobile-search" onSubmit={submitSearch}>
           <MagnifyingGlass aria-hidden weight="bold" />
-          <input aria-label="Поиск по каталогу" onChange={(event) => setQuery(event.target.value)} placeholder="Найти товар, бренд или категорию" value={query} />
+          <input aria-label="Поиск по каталогу" onBlur={() => window.setTimeout(() => setSearchOpen(false), 120)} onChange={(event) => { setQuery(event.target.value); setSearchOpen(true); }} onFocus={() => setSearchOpen(true)} placeholder="Найти товар, бренд или категорию" value={query} />
+          <SearchSuggestions />
         </form>
       </header>
 

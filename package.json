@@ -6,7 +6,7 @@
     "dev": "node scripts/dev.mjs",
     "build": "next build",
     "start": "next start",
-    "catalog:refresh": "node scripts/moysklad-catalog-snapshot.mjs",
+    "catalog:refresh": "node scripts/moysklad-rostov-stock.mjs",
     "catalog:export": "node scripts/export-catalog.mjs",
     "catalog:check": "node --experimental-strip-types scripts/test-catalog.mjs"
   },

@@ -6419,6 +6419,7 @@ summary:focus-visible {
 /* Category visuals, subgroups and consistent link states */
 .product-copy h3 a,.catalog-product-copy>a,.category-card{color:var(--ink);text-decoration:none}
 .product-copy h3 a:visited,.catalog-product-copy>a:visited,.category-card:visited{color:var(--ink)}
+.filter-group>.brand-list-toggle{grid-template-columns:1fr auto;margin-top:7px;padding:8px 10px;border:1px solid var(--border);border-radius:10px;color:var(--ink);font-weight:700;text-align:left;background:#fff}.filter-group>.brand-list-toggle svg{width:14px;height:14px;transition:transform .18s ease}.filter-group>.brand-list-toggle.is-open svg{transform:rotate(180deg)}
 .directory-card>span.directory-card-image{position:relative;width:86px;height:78px;display:block;flex:0 0 86px}
 .directory-card-image img{object-fit:contain;filter:drop-shadow(0 9px 10px rgba(17,19,21,.12))}
 .directory-card:hover .directory-card-image img{transform:scale(1.05)}

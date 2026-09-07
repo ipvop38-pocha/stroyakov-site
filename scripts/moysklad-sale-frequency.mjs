@@ -6,7 +6,7 @@ const base = 'https://api.moysklad.ru/api/remap/1.2/';
 const root = path.resolve('private/moysklad');
 const token = (await readFile(process.argv[2], 'utf8')).trim().replace(/^Bearer\s+/i, '');
 if (!token || /\s/.test(token)) throw new Error('Invalid token file format');
-const scope = JSON.parse(await readFile(path.join(root, 'scope.json'), 'utf8'));
+const scope = JSON.parse(await readFile(path.join(root, 'catalog-sales-scope.json'), 'utf8'));
 const audit = JSON.parse(await readFile(path.join(root, 'catalog-audit.json'), 'utf8'));
 const from = '2026-03-01 00:00:00';
 const until = '2026-09-01 00:00:00';

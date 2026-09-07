@@ -2,12 +2,10 @@ import { readFile, writeFile, access } from 'node:fs/promises';
 import path from 'node:path';
 
 const read = async file => JSON.parse(await readFile(file, 'utf8'));
-const [selection, snapshot, editorial] = await Promise.all([
-  read('private/moysklad/catalog-frequency.json'),
+const [snapshot, editorial] = await Promise.all([
   read('private/moysklad/catalog-snapshot.json'),
   read('catalog/editorial.json'),
 ]);
-const current = new Map(snapshot.products.map(product => [product.code, product]));
 const curated = new Map(editorial.filter(product => product.status === 'published').map(product => [product.code, product]));
 const operationalCodes = new Set(['0545816227']); // «Доставка (товар)» is not a physical catalog product.
 
@@ -185,14 +183,15 @@ function genericCopy(title, category) {
 }
 
 const output = [];
-for (const original of selection.products) {
-  if (operationalCodes.has(original.code)) continue;
-  const live = current.get(original.code);
-  if (!live || live.id !== original.id || original.saleCount < 5) throw new Error(`Invalid selection: ${original.code}`);
-  if (/поликарбонат/i.test(`${live.rawName} ${live.categoryPath}`) || live.archived) throw new Error(`Excluded product: ${original.code}`);
-  const entry = curated.get(original.code);
+let hiddenOperationalItems = 0;
+for (const [index, live] of snapshot.products.entries()) {
+  if (operationalCodes.has(live.code)) { hiddenOperationalItems++; continue; }
+  if (!(live.available > 0 || live.selectedBySales) || snapshot.stores.length !== 1 || snapshot.stores[0].name !== 'СтроякоV Склад Ростовское шоссе') throw new Error(`Invalid Rostov catalog selection: ${live.code}`);
+  if (/поликарбонат|(?:^|\/)ЛАБИНСК(?:\/|$)/i.test(`${live.rawName} ${live.categoryPath}`) || live.archived) throw new Error(`Excluded product: ${live.code}`);
+  const original = { ...live, name: live.rawName };
+  const entry = curated.get(live.code);
   const category = ['Гипсокартон','Листовые материалы'].includes(entry?.category) ? 'Гипсокартон и листовые' : entry?.category || categoryFor(original);
-  const draft = { ...original, code: original.code };
+  const draft = { ...original, code: live.code };
   const baseName = cleanTitle.call(draft, entry?.name || live.rawName, category);
   const kind = entry?.productKind || productKindFor(original, category);
   const brand = entry?.brand || brandFor(original);
@@ -206,28 +205,28 @@ for (const original of selection.products) {
     await access(asset);
   }
   output.push({
-    id: original.code, code: original.code, slug: entry?.slug || slugFor(original.code, name),
+    id: live.code, code: live.code, slug: entry?.slug || slugFor(live.code, name),
     brand, name, category, subgroup, productKind: kind,
     unit: entry?.unit || unitFor(live, category), image, photoStyle: entry?.photoStyle || 'pending',
-    stock: live.available, price: live.retailPriceMinor === null ? null : live.retailPriceMinor / 100,
-    popularity: selection.products.length - selection.products.findIndex(product => product.code === original.code),
-    searchAliases: [...new Set([...(entry?.searchAliases || []), live.rawName, original.categoryPath, kind])],
+    stock: Math.max(0, live.available), price: live.retailPriceMinor === null ? null : live.retailPriceMinor / 100,
+    popularity: snapshot.products.length - index,
+    searchAliases: [...new Set([...(entry?.searchAliases || []), live.rawName, live.categoryPath, kind, subgroup])],
     quickDescription: entry?.quickDescription || quickByCategory[category] || `Товар из раздела «${category}». Уточним параметры и совместимость перед заказом.`,
     description: entry?.description || genericCopy(name, category),
-    specs: entry?.specs || [['Код товара', original.code], ['Раздел', kind]],
+    specs: entry?.specs || [['Код товара', live.code], ['Раздел', kind]],
     ...(entry?.variantGroup ? { variantGroup: entry.variantGroup, variantLabel: entry.variantLabel } : {}),
     ...(entry?.calculator ? { calculator: entry.calculator } : {}),
-    ...(original.code === '00876' ? { companionIds: ['00971','00859','00668'] } : {}),
+    ...(live.code === '00876' ? { companionIds: ['00971','00859','00668'] } : {}),
     comparisonGroup: /штукатур.*гипсов|гипсов.*штукатур/i.test(`${name} ${live.rawName}`) ? 'gypsum-plaster' : kind,
   });
 }
-if (output.length !== selection.products.length - operationalCodes.size) throw new Error('Catalog count mismatch.');
+if (output.length !== snapshot.products.length - hiddenOperationalItems) throw new Error('Catalog count mismatch.');
 if (new Set(output.map(product => product.slug)).size !== output.length || new Set(output.map(product => product.id)).size !== output.length) throw new Error('Duplicate routes or ids.');
 output.sort((left, right) => right.popularity - left.popularity);
-await writeFile('app/catalog/products.generated.json', JSON.stringify({ updatedAt: snapshot.completedAt, stockMoment: snapshot.stockMoment, selectedProducts: selection.products.length, hiddenOperationalItems: operationalCodes.size, products: output }, null, 2) + '\n');
+await writeFile('app/catalog/products.generated.json', JSON.stringify({ updatedAt: snapshot.completedAt, stockMoment: snapshot.stockMoment, selectedProducts: snapshot.products.length, hiddenOperationalItems, products: output }, null, 2) + '\n');
 const queue = output.filter(product => !product.image || !curated.has(product.code)).map(product => ({
   code: product.code, name: product.name, category: product.category, productKind: product.productKind,
   needs: [...(!product.image ? ['Оригинал фото производителя', 'Фото в утверждённом стиле'] : []), ...(!curated.has(product.code) ? ['Редакторская проверка названия', 'Источники характеристик', 'SEO-описание'] : []), ...(product.price === null ? ['Уточнить Розница ЛАБ.'] : [])],
 }));
-await writeFile('private/moysklad/editorial-queue.json', JSON.stringify({ updatedAt: snapshot.completedAt, selected: selection.products.length, publishedInCatalog: output.length, hiddenOperationalItems: operationalCodes.size, remainingEditorialWork: queue.length, products: queue }, null, 2) + '\n');
-console.log(JSON.stringify({ selected: selection.products.length, publishedInCatalog: output.length, hiddenOperationalItems: operationalCodes.size, categories: Object.fromEntries([...new Set(output.map(product => product.category))].sort().map(category => [category, output.filter(product => product.category === category).length])), withoutRetailPrice: output.filter(product => product.price === null).length, withoutFinalPhoto: output.filter(product => !product.image).length }));
+await writeFile('private/moysklad/editorial-queue.json', JSON.stringify({ updatedAt: snapshot.completedAt, selected: snapshot.products.length, publishedInCatalog: output.length, hiddenOperationalItems, remainingEditorialWork: queue.length, products: queue }, null, 2) + '\n');
+console.log(JSON.stringify({ selected: snapshot.products.length, publishedInCatalog: output.length, hiddenOperationalItems, categories: Object.fromEntries([...new Set(output.map(product => product.category))].sort().map(category => [category, output.filter(product => product.category === category).length])), withoutRetailPrice: output.filter(product => product.price === null).length, withoutFinalPhoto: output.filter(product => !product.image).length }));
