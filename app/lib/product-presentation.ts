@@ -4,9 +4,9 @@ export function productPriceText(price: number | null): string {
   return price === null ? 'Цена по запросу' : `${price.toLocaleString('ru-RU')} ₽`;
 }
 
-export function productStockText(product: Pick<CatalogProduct, 'stock' | 'unit'>): string {
+export function productStockText(product: Pick<CatalogProduct, 'stock' | 'unit' | 'stockLocation'>): string {
   if (product.stock === null) return 'Наличие уточняется';
-  return product.stock > 0 ? `В наличии: ${productQuantityText(product.stock, product.unit)}` : 'Под заказ';
+  return product.stock > 0 ? `${product.stockLocation?.startsWith('Лабинск') ? 'Лабинск: ' : 'В наличии: '}${productQuantityText(product.stock, product.unit)}` : 'Под заказ';
 }
 
 export function productQuantityText(quantity: number, unit: string): string {

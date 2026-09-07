@@ -50,8 +50,9 @@ export default function CatalogPage() {
 
   useEffect(() => {
     const url = new URL(window.location.href);
-    const initialCategory = categoryMap[url.searchParams.get("category") || ""] || "Все товары";
+    let initialCategory = categoryMap[url.searchParams.get("category") || ""] || "Все товары";
     const requestedSubgroup = url.searchParams.get("group");
+    if (initialCategory === "Инструмент и расходники" && ["Ленты", "Сетки и стеклохолст"].includes(requestedSubgroup || "")) initialCategory = "Сетки и ленты";
     setQuery(url.searchParams.get("q") || "");
     setCategory(initialCategory);
     const initialSubgroup = catalogProducts.some(product => product.category === initialCategory && product.subgroup === requestedSubgroup) ? requestedSubgroup! : "Все подгруппы";
@@ -114,7 +115,7 @@ export default function CatalogPage() {
   function addProduct(product: CatalogProduct) {
     if (product.price === null || product.stock === null || product.stock <= 0) return;
     const current = readCart(); const id = `product-${product.id}`; const existing = current.find(item => item.id === id);
-    writeCart(existing ? current.map(item => item.id === id ? { ...item, quantity: item.quantity + 1 } : item) : [...current, { id, title: product.name, price: product.price, quantity: 1, image: product.image, detail: `${product.brand} · ${product.unit}` }]);
+    writeCart(existing ? current.map(item => item.id === id ? { ...item, quantity: item.quantity + 1 } : item) : [...current, { id, title: product.name, price: product.price, quantity: 1, image: product.image, detail: [product.brand, product.unit, product.stockLocation].filter(Boolean).join(" · ") }]);
     setAdded(value => [...new Set([...value, product.id])]);
   }
   function resetFilters() { setCategory("Все товары"); setSubgroup("Все подгруппы"); setQuery(""); setBrands([]); setSelectedFacets({}); setShowAllBrands(false); setAvailability("all"); updateUrl("Все товары", "Все подгруппы", "all", "", {}, []); }
@@ -140,7 +141,7 @@ export default function CatalogPage() {
       </div>}
       <div className="filter-group"><b>Наличие</b><button className={availability === "stock" ? "is-active" : ""} onClick={() => chooseAvailability("stock")} type="button"><span/>В наличии</button><button className={availability === "order" ? "is-active" : ""} onClick={() => chooseAvailability("order")} type="button"><span/>Под заказ</button></div>
       {allBrands.length > 0 && <div className="filter-group"><b>Бренды</b>{visibleBrands.map(item => <button aria-pressed={brands.includes(item)} className={brands.includes(item) ? "is-active" : ""} key={item} onClick={() => toggleBrand(item)} type="button"><span/>{item}</button>)}{allBrands.length > 7 && <button className={`brand-list-toggle ${showAllBrands ? "is-open" : ""}`} onClick={() => setShowAllBrands(value => !value)} type="button">{showAllBrands ? "Скрыть бренды" : `Показать все бренды · ${allBrands.length}`}<CaretDown/></button>}</div>}
-      <div className="filter-note"><b>Остатки Краснодар</b><p>Наличие и итоговую стоимость подтвердим перед отгрузкой.</p></div>
+      <div className="filter-note"><b>Наличие на складах</b><p>Металлопрокат — в том числе со склада «Родина» в Лабинске. Место и условия отгрузки подтвердим при заказе.</p></div>
       <button className="filter-apply" onClick={() => setFiltersOpen(false)} type="button">Показать товары · {filtered.length}</button>
     </aside><section className="catalog-results">
       {refinementCount > 0 && <div className="active-filters" aria-label="Выбранные фильтры">

@@ -1,6 +1,9 @@
 import { readFile, writeFile, access } from 'node:fs/promises';
 import path from 'node:path';
-import { classifyProduct, hiddenCatalogName } from './catalog-taxonomy.mjs';
+import { classifyProduct } from './catalog-taxonomy.mjs';
+import { catalogInventory } from './catalog-inventory.mjs';
+import { inventoryPresentation, tidyTitle } from './catalog-presentation.mjs';
+import { inventoryFacets } from './catalog-inventory-facets.mjs';
 
 const read = async file => JSON.parse(await readFile(file, 'utf8'));
 const [snapshot, editorial] = await Promise.all([
@@ -9,98 +12,30 @@ const [snapshot, editorial] = await Promise.all([
 ]);
 const curated = new Map(editorial.filter(product => product.status === 'published').map(product => [product.code, product]));
 const merchandising = await read('catalog/merchandising.json');
+const labinsk = await read('private/moysklad/labinsk-metal-snapshot.json');
+const facts = (await read('catalog/product-facts.json')).products;
+const titles = await read('catalog/title-overrides.json');
+const selection = catalogInventory(snapshot, labinsk);
 const popularity = new Map(merchandising.rankedIds.map((code, index) => [code, merchandising.rankedIds.length - index]));
-const operationalCodes = new Set(['0545816227']); // «Доставка (товар)» is not a physical catalog product.
-
-function canonicalTitle(title, raw, brand) {
-  const dimensionSource = raw.replace(/Т\d+\s*[-–]\s*/i, '');
-  const dimension = dimensionSource.match(/(\d{2,3}(?:[.,]\d+)?)\s*[-*xх×]\s*(\d+(?:[.,]\d+)?)\s*[-*xх×]\s*(\d+(?:[.,]\d+)?)/i);
-  const dimensions = dimension ? `${dimension[1]}×${dimension[2]}×${dimension[3]} мм`.replace(/\./g, ',') : '';
-  const count = raw.match(/(?:\(|<|в\s*уп\.?\s*)?\s*(\d{2,4})\s*шт/i)?.[1];
-  if (/КРУГ\s+ОТРЕЗ|ДИСК\s+ОТР/i.test(raw)) {
-    const diskBrand = /BIVOL/i.test(raw) ? 'Bivol' : /КРАТОН/i.test(raw) ? 'Кратон' : /MAXI\s*TOOL/i.test(raw) ? 'MaxiTool' : brand;
-    return ['Диск отрезной по металлу', dimensions, diskBrand].filter(Boolean).join(' ');
-  }
-  if (/^(?:САМОРЕЗ|ШУРУП)/i.test(raw)) {
-    const screwDimension = raw.match(/(\d+(?:[.,]\d+)?)\s*[*xх×]\s*(\d+(?:[.,]\d+)?)/i);
-    const size = screwDimension ? `${screwDimension[1]}×${screwDimension[2]} мм` : raw.match(/\b(\d{2,3})\b/)?.[1] ? `${raw.match(/\b(\d{2,3})\b/)?.[1]} мм` : '';
-    const purpose = /кров/i.test(raw) ? 'Саморез кровельный' : /шест/i.test(raw) ? 'Саморез с шестигранной головкой' : /ГКЛ|металл/i.test(raw) ? 'Саморез по металлу' : 'Саморез';
-    const screwBrand = /КНАУФ|KNAUF/i.test(raw) ? 'Knauf' : brand;
-    return [purpose, size, screwBrand, count ? `${count} шт.` : ''].filter(Boolean).join(', ').replace(', ,', ',');
-  }
-  return title.replace(/с шурупом/gi, 'с саморезом');
-}
-
-function cleanTitle(raw, category) {
-  let title = raw.normalize('NFKC').replace(/[“”"]/g, '').replace(/\s+/g, ' ').trim();
-  title = title.replace(/\bNo\s*(\d+)/gi, '№$1').replace(/(\d)\s*[xх*]\s*(?=\d)/g, '$1×');
-  title = title.replace(/\bдля внутренних и наружных работ\b/gi, '').replace(/\bдля вн\.? и наруж\.? работ\b/gi, '');
-  title = title.replace(/\s*<\s*\d+\s*шт\s*>\s*\([А-ЯМЗ]\)\s*$/i, '');
-  for (let pass = 0; pass < 3; pass++) {
-    title = title.replace(/\s*\(([^()]*)\)\s*$/i, (match, content) => {
-      const pack = content.trim();
-      const weightPack = pack.match(/^(\d+(?:[.,]\d+)?)\s*\/\s*\d+(?:\s*шт\.?)?$/i);
-      if (weightPack && (category === 'Сухие смеси' || category === 'Цемент')) return `, ${weightPack[1]} кг`;
-      if (/(?:шт|пал|паллет|бэг|кор|шоубокс|упак|пар)/i.test(pack) || /^\d+(?:\s*\/\s*\d+)?$/.test(pack) || /^\d+\s*[/,]\s*\d+/.test(pack)) return '';
-      return match;
-    });
-  }
-  title = title.replace(/(\d+(?:[.,]\d+)?)\s*кг\s*\/\s*\d+(?:\s*шт\.?)?/gi, '$1 кг');
-  title = title.replace(/\s*[/,]?\s*\d+\s*(?:шт\.?\s*\/\s*паллет|шт\.?|лист(?:ов)?\s*\/\s*пал|паллет)\s*$/i, '');
-  title = title.replace(/\s*,?\s*\bарт\.?\s*\d+.*$/i, '');
-  title = title.replace(/\s*выдерживают\s+до\s+\d+\s*кг.*$/i, '');
-  title = title.replace(/машинного и ручного нанесения/gi, 'ручного и МН').replace(/машинного нанесения/gi, 'МН');
-  title = title.replace(/шпатлевк/gi, 'шпаклёвк').replace(/Шпатлевк/g, 'Шпаклёвк');
-  title = title.replace(/\bТрубы электросварные\b/gi, 'Труба электросварная').replace(/\bтрубы электросварные\b/g, 'Труба электросварная');
-  title = title.replace(/\bпрямоуг(?=\d|\s)/gi, 'прямоугольная ');
-  title = title.replace(/(?:ГОСТ|ТУ)\s+дл\.?\s*6000/gi, 'длина 6 м').replace(/(?:ГОСТ|ТУ)\s+дл\.?\s*12000/gi, 'длина 12 м');
-  title = title.replace(/\bдл\.?\s*6000\b/gi, 'длина 6 м').replace(/\bдл\.?\s*12000\b/gi, 'длина 12 м').replace(/\bдл\.?\s*11[,.]\s*7\s*м?\b/gi, 'длина 11,7 м');
-  title = title.replace(/\s+(?:ГОСТ|ТУ)\s*\d[\d.\-/]*(?:-\d+)?/gi, '');
-  title = title.replace(/\s+,/g, ',').replace(/,{2,}/g, ',').replace(/\s{2,}/g, ' ').trim();
-  title = title.replace(/[,.\/-]+$/g, '').trim();
-  const insulation = title.match(/(?:Утеплитель\s+)?IZOLIFE\s+(.+?)\s+(\d{4})[.×](\d{3})[.×](\d+)\b/i);
-  if (insulation) {
-    const count = raw.match(/\((\d+)\s*(?:плит|пл\.)/i)?.[1];
-    title = `Утеплитель Izolife ${insulation[1].trim()} ${insulation[2]}×${insulation[3]}×${insulation[4]} мм${count ? `, ${count} плит` : ''}`;
-  }
-  const overrides = {
-    '00876': 'Штукатурка гипсовая Русгипс №6 МН, 30 кг',
-    '00699': 'Штукатурка гипсовая Русгипс №8 толстослойная, 25 кг',
-    '01060': 'Шпаклёвка гипсовая Satentek, 20 кг',
-    '00700': 'Шпаклёвка гипсовая Русгипс №21 финишная, 25 кг',
-    '00140': 'Гипсокартон влагостойкий Danogips 2500×1200×12,5 мм',
-    '00141': 'Гипсокартон влагостойкий Danogips 2500×1200×9,5 мм',
-    '00142': 'Гипсокартон Danogips 2500×1200×12,5 мм',
-    '00144': 'Гипсокартон Danogips 2500×1200×9,5 мм',
-    '00143': 'Шпаклёвка готовая финишная Danogips SuperFinish, 18,1 кг / 11 л',
-    '00704': 'Шпаклёвка готовая финишная Danogips SuperFinish, 28 кг / 17 л',
-    '00895': 'Штукатурка гипсовая Русгипс №5 ручного нанесения, 30 кг',
-    '00562': 'Клей для плитки ЕС 3000, 25 кг',
-    '00563': 'Клей для плитки ЕС 2000, 25 кг',
-    '00823': 'Монтажная смесь ИС Монтажный, 25 кг',
-    '00810': 'Штукатурка фасадная ИС, 25 кг',
-    '00801': 'ЦПС ИС М-300, 25 кг',
-    '00816': 'Клей плиточный ИС Стандарт, 25 кг',
-    '00814': 'Стяжка ИС, 25 кг',
-  };
-  title = overrides[this?.code] || title;
-  if (title.length > 108) {
-    const shortened = title.slice(0, 105);
-    title = shortened.slice(0, shortened.lastIndexOf(' ')).replace(/[,.\/-]+$/g, '').trim();
-  }
-  return title;
-}
 function brandFor(product) {
-  const text = `${product.name} ${product.categoryPath}`;
+  const text = product.name;
   const brands = [
     ['DANOGIPS', /DANOGIPS|ДАНОГИПС/i], ['РУСГИПС', /РУСГИПС/i], ['SATENTEK', /САТ[ЕИ]НТЕ[КК]|SATENTEK/i],
     ['ПЕНОПЛЭКС', /ПЕНОПЛЭКС/i], ['KNAUF', /КНАУФ|KNAUF/i], ['CERESIT', /ЦЕРЕЗИТ|CERESIT/i],
     ['ВОЛМА', /ВОЛМА/i], ['ОСНОВИТ', /ОСНОВИТ/i], ['ХАБЕЗ', /ХАБЕЗ/i], ['LITOKOL', /ЛИТОКОЛ|LITOKOL/i],
     ['KRATEX', /КРАТЭКС|KRATEX/i], ['IZOLIFE', /ИЗОЛАЙФ|IZOLIFE/i], ['ROKS', /РОКС/i],
-    ['ЕС', /ЕС-СМЕСИ|\bЕС\b/i], ['ИС', /ИС-СМЕСИ|\bИС[- ]/i], ['МТ', /МТ-ПРОФИЛЬ|\bМТ\b/i],
+    ['ЕС', /ЕС-СМЕСИ|(?<![а-я])ЕС(?![а-я])/iu], ['ИС', /ИС-СМЕСИ|(?<![а-я])ИС[- ]/iu], ['МТ', /МТ-ПРОФИЛЬ|(?<![а-я])МТ(?![а-я])/iu],
+    ['ЕП', /(?<![а-я])ЕП(?![а-я])/iu],
+    ['ULTRADECOR', /ULTRADECOR/i], ['X-GLASS', /X-\s*Glass/i], ['СТАЛЬНОФФ', /Стальнофф/i],
+    ['САМИКС', /САМИКС/i], ['НОВОКОЛОР', /НОВОКОЛОР/i], ['TECH-KREP', /Tech-KREP/i],
+    ['DERZHI', /DERZHI/i], ['BIBER', /БИБЕР|BIBER/i], ['КРАТОН', /КРАТОН/i], ['ARMSTRONG', /Armstrong/i],
     ['MAXITOOL', /MAXI\s*TOOL/i], ['ТЕХНОНИКОЛЬ', /ТЕХНОНИКОЛЬ/i],
+    ['PROFF-СТАЛЬ', /Proff-Сталь/i], ['KOLOTEK', /Kolotek/i], ['PROFFIT', /PROFFIT/i],
+    ['BASTION-PRO', /Bastion-PRO/i], ['REFIT', /REFIT/i], ['FOMERON', /FOMERON/i], ['ПЕНОК', /ПенОК/i],
+    ['ИНТЕК', /Интек/i], ['BELTEX', /BELTEX/i], ['НАМЕРЕНИЕ', /Намерение/i],
+    ['ЦЕМРОС', /Цемрос/i], ['ВБЦЗ', /ВБЦЗ/i],
   ];
-  return brands.find(([, pattern]) => pattern.test(text))?.[0] || (product.categoryPath.startsWith('(В) МЕТАЛЛ') ? 'МЕТАЛЛОПРОКАТ' : '');
+  return brands.find(([, pattern]) => pattern.test(text))?.[0] || '';
 }
 
 function unitFor(product, category) {
@@ -135,20 +70,30 @@ function genericCopy(title, category) {
 const previousCatalog = await read('app/catalog/products.generated.json');
 const previousProducts = new Map(previousCatalog.products.map(p => [p.code, p]));
 const output = [];
-let hiddenByPolicy = 0;
-let hiddenOperationalItems = 0;
-for (const live of snapshot.products) {
-  if (operationalCodes.has(live.code)) { hiddenOperationalItems++; continue; }
-  if (hiddenCatalogName.test(live.rawName)) { hiddenByPolicy++; continue; }
-  if (!(live.available > 0 || live.selectedBySales) || snapshot.stores.length !== 1 || snapshot.stores[0].name !== 'СтроякоV Склад Ростовское шоссе') throw new Error(`Invalid Rostov catalog selection: ${live.code}`);
-  if (/поликарбонат|(?:^|\/)ЛАБИНСК(?:\/|$)/i.test(`${live.rawName} ${live.categoryPath}`) || live.archived) throw new Error(`Excluded product: ${live.code}`);
+const audit = [];
+const { hiddenByPolicy, hiddenOperationalItems } = selection;
+for (const live of selection.products) {
   const original = { ...live, name: live.rawName };
   const entry = curated.get(live.code);
+  const fact = facts[live.code];
   const { category, subgroup, productKind: kind } = classifyProduct(live);
-  const draft = { ...original, code: live.code };
-  const baseName = cleanTitle.call(draft, entry?.name || live.rawName, category);
-  const brand = entry?.brand || brandFor(original);
-  const name = entry?.name ? baseName : canonicalTitle(baseName, live.rawName, brand);
+  if (!titles[live.code] && !fact?.title && category !== 'Металлопрокат' && !['Саморезы','Стеновые профили','Потолочные профили','Маяки металлические'].includes(subgroup)) throw new Error(`Title review required: ${live.code}`);
+  const brand = entry?.brand || fact?.brand || brandFor(original);
+  const presented = inventoryPresentation(live, category, subgroup, brand, live.rawName);
+  const name = tidyTitle(titles[live.code] || (fact?.title ? [fact.title, ...presented.packing].join(', ') : presented.name));
+  const filterFacts = { ...inventoryFacets({ name: live.rawName, category, subgroup, specs: entry?.specs || [] }), ...presented.facets, ...(fact?.facets || {}) };
+  if (live.code === '03232') delete filterFacts.density; // Warehouse says g/m; area density is unconfirmed.
+  const officialKeys = new Set([...(fact?.source?.scope || []), ...(fact?.additionalSources || []).flatMap(source=>source.scope)]);
+  for (const key of ['base','application']) if (filterFacts[key] && !officialKeys.has(key)) throw new Error(`Missing manufacturer evidence for ${live.code}: ${key}`);
+  audit.push({ code:live.code, name, inventoryName:live.rawName, category, subgroup,
+    status:fact?.source?(fact.identityNote?'manufacturer-family-matched':'manufacturer-matched'):!brand?'generic-inventory':'manufacturer-page-unresolved',
+    officialSource:fact?.source||null,
+    additionalSources:fact?.additionalSources||[],
+    identityNote:fact?.identityNote||null,
+    inventoryProperties:Object.keys(filterFacts).filter(key=>!officialKeys.has(key)),
+    missingSemanticProperties:/Штукатурки|Шпаклёвки/.test(subgroup)?['base','application'].filter(key=>!filterFacts[key]):[],
+    reference:!brand&&/Трубы|Саморезы/.test(subgroup)?'Saturn naming pattern; only own inventory dimensions and packaging are used':null,
+  });
   const image = entry?.image || null;
   if (image) {
     if (!image.startsWith('/assets/products/')) throw new Error('Invalid image path.');
@@ -161,8 +106,10 @@ for (const live of snapshot.products) {
     brand, name, category, subgroup, productKind: kind,
     unit: entry?.unit || unitFor(live, category), image, photoStyle: entry?.photoStyle || 'pending',
     stock: Math.max(0, live.available), price: live.retailPriceMinor === null ? null : live.retailPriceMinor / 100,
+    stockLocation: live.stockLocation,
+    facets: filterFacts,
     popularity: popularity.get(live.code) || 0,
-    searchAliases: [...new Set([...(entry?.searchAliases || []), live.rawName, live.categoryPath, kind, subgroup])],
+    searchAliases: [...new Set([...(entry?.searchAliases || []), live.rawName, live.categoryPath, kind, subgroup, ...Object.values(filterFacts).flat()])],
     quickDescription: entry?.quickDescription || quickByCategory[category] || `Товар из раздела «${category}». Уточним параметры и совместимость перед заказом.`,
     description: entry?.description || genericCopy(name, category),
     specs: entry?.specs || [['Код товара', live.code], ['Раздел', kind]],
@@ -172,13 +119,15 @@ for (const live of snapshot.products) {
     comparisonGroup: /штукатур.*гипсов|гипсов.*штукатур/i.test(`${name} ${live.rawName}`) ? 'gypsum-plaster' : kind,
   });
 }
-if (output.length !== snapshot.products.length - hiddenOperationalItems - hiddenByPolicy) throw new Error('Catalog count mismatch.');
+if (output.length !== selection.products.length) throw new Error('Catalog count mismatch.');
 if (new Set(output.map(product => product.slug)).size !== output.length || new Set(output.map(product => product.id)).size !== output.length) throw new Error('Duplicate routes or ids.');
 output.sort((left, right) => right.popularity - left.popularity);
-await writeFile('app/catalog/products.generated.json', JSON.stringify({ updatedAt: snapshot.completedAt, stockMoment: snapshot.stockMoment, selectedProducts: snapshot.products.length, hiddenOperationalItems, hiddenByPolicy, products: output }, null, 2) + '\n');
+await writeFile('app/catalog/products.generated.json', JSON.stringify({ updatedAt: snapshot.completedAt, stockMoment: snapshot.stockMoment, labinskStockMoment:labinsk.stockMoment, selectedProducts: snapshot.products.length + labinsk.products.length, hiddenOperationalItems, hiddenByPolicy, products: output }, null, 2) + '\n');
 const queue = output.filter(product => !product.image || !curated.has(product.code)).map(product => ({
   code: product.code, name: product.name, category: product.category, productKind: product.productKind,
   needs: [...(!product.image ? ['Оригинал фото производителя', 'Фото в утверждённом стиле'] : []), ...(!curated.has(product.code) ? ['Редакторская проверка названия', 'Источники характеристик', 'SEO-описание'] : []), ...(product.price === null ? ['Уточнить Розница ЛАБ.'] : [])],
 }));
-await writeFile('private/moysklad/editorial-queue.json', JSON.stringify({ updatedAt: snapshot.completedAt, selected: snapshot.products.length, publishedInCatalog: output.length, hiddenOperationalItems, remainingEditorialWork: queue.length, products: queue }, null, 2) + '\n');
-console.log(JSON.stringify({ selected: snapshot.products.length, publishedInCatalog: output.length, hiddenOperationalItems, categories: Object.fromEntries([...new Set(output.map(product => product.category))].sort().map(category => [category, output.filter(product => product.category === category).length])), withoutRetailPrice: output.filter(product => product.price === null).length, withoutFinalPhoto: output.filter(product => !product.image).length }));
+const selectedCount = snapshot.products.length + labinsk.products.length;
+await writeFile('private/moysklad/editorial-queue.json', JSON.stringify({ updatedAt: snapshot.completedAt, selected: selectedCount, publishedInCatalog: output.length, hiddenOperationalItems, remainingEditorialWork: queue.length, products: queue }, null, 2) + '\n');
+console.log(JSON.stringify({ selected: selectedCount, publishedInCatalog: output.length, hiddenOperationalItems, categories: Object.fromEntries([...new Set(output.map(product => product.category))].sort().map(category => [category, output.filter(product => product.category === category).length])), withoutRetailPrice: output.filter(product => product.price === null).length, withoutFinalPhoto: output.filter(product => !product.image).length }));
+await writeFile('private/catalog-research/catalog-review.json',JSON.stringify({reviewedAt:'2026-09-07',products:audit},null,2)+'\n');

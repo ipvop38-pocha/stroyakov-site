@@ -57,7 +57,7 @@ export default function ProductPage() {
     const current = readCart();
     const id = `product-${item.id}`;
     const existing = current.find(entry => entry.id === id);
-    writeCart([...current.filter(entry => entry.id !== id), { id, title: item.name, price: item.price, quantity: (existing?.quantity || 0) + count, image: item.image, detail: `${item.brand} · ${item.unit}` }]);
+    writeCart([...current.filter(entry => entry.id !== id), { id, title: item.name, price: item.price, quantity: (existing?.quantity || 0) + count, image: item.image, detail: [item.brand, item.unit, item.stockLocation].filter(Boolean).join(" · ") }]);
     if (item.id === selectedProduct.id) setAdded(true);
     else setRelatedAdded(ids => [...ids, item.id]);
   }
@@ -72,7 +72,7 @@ export default function ProductPage() {
         <p className="product-photo-note">Внешний вид упаковки может отличаться в зависимости от партии.</p>
       </div>
       <div className="product-info">
-        <div className="product-brand-row"><p className="card-eyebrow">{product.brand}</p><span>Код: {product.code}</span></div>
+        <div className="product-brand-row">{product.brand && <p className="card-eyebrow">{product.brand}</p>}<span>Код: {product.code}</span></div>
         <h1>{product.name}</h1>
         <p className="product-quick-description">{product.quickDescription}</p>
         <div className={`product-stock-large ${hasStock ? "" : "stock-unconfirmed"}`}><span/><b>{productStockText(product)}</b></div>
@@ -100,7 +100,7 @@ export default function ProductPage() {
     </section>
     <section className="product-content">
       <div className="product-tabs"><button className={tab === "description" ? "is-active" : ""} onClick={() => setTab("description")} type="button">Описание</button><button className={tab === "specs" ? "is-active" : ""} onClick={() => setTab("specs")} type="button">Характеристики</button></div>
-      {tab === "description" ? <div className="product-description"><div><p className="eyebrow">О товаре</p><h2>Для каких работ подходит</h2><p>{product.description}</p><ul><li><Check/>Проверим наличие перед оплатой</li><li><Check/>Подберём сопутствующие материалы</li><li><Check/>Поможем рассчитать доставку на объект</li></ul></div><aside><Package/><b>Комплектуем под задачу</b><p>Подберём совместимые материалы и проверим наличие перед оплатой.</p><Link href="/business/assembly/">Помочь с комплектом<ArrowRight/></Link></aside></div> : <div className="product-specs"><div><p className="eyebrow">Характеристики</p><h2>Основные параметры</h2></div><dl>{product.specs?.map(([name, value]) => <div key={name}><dt>{name}</dt><dd>{value}</dd></div>)}<div><dt>Бренд</dt><dd>{product.brand}</dd></div><div><dt>Единица продажи</dt><dd>{product.unit}</dd></div></dl></div>}
+      {tab === "description" ? <div className="product-description"><div><p className="eyebrow">О товаре</p><h2>Для каких работ подходит</h2><p>{product.description}</p><ul><li><Check/>Проверим наличие перед оплатой</li><li><Check/>Подберём сопутствующие материалы</li><li><Check/>Поможем рассчитать доставку на объект</li></ul></div><aside><Package/><b>Комплектуем под задачу</b><p>Подберём совместимые материалы и проверим наличие перед оплатой.</p><Link href="/business/assembly/">Помочь с комплектом<ArrowRight/></Link></aside></div> : <div className="product-specs"><div><p className="eyebrow">Характеристики</p><h2>Основные параметры</h2></div><dl>{product.specs?.map(([name, value]) => <div key={name}><dt>{name}</dt><dd>{value}</dd></div>)}{product.brand && <div><dt>Бренд</dt><dd>{product.brand}</dd></div>}<div><dt>Единица продажи</dt><dd>{product.unit}</dd></div></dl></div>}
     </section>
     <section className="product-receiving"><div><p className="eyebrow">Получение товара</p><h2>Выберите удобный способ</h2></div><div className="receiving-grid"><article><span><Truck weight="bold"/></span><h3>Доставка на объект</h3><p>Подберём машину по объёму заказа и согласуем интервал.</p><Link href="/delivery/">Условия доставки<ArrowRight/></Link></article><article><span><Storefront weight="bold"/></span><h3>Самовывоз со склада</h3><p>Подготовим заказ к приезду и проверим комплектность.</p><Link href="/contacts/">Как нас найти<ArrowRight/></Link></article><article><span><SealCheck weight="bold"/></span><h3>Проверка заказа</h3><p>Менеджер подтвердит остатки и замены до оплаты.</p><Link href="/business/assembly/">Комплектация<ArrowRight/></Link></article></div></section>
     <section className="product-documents"><div className="document-visual"><FileText weight="duotone"/><span><b>Документы к партии</b><small>Паспорт качества<br/>Документы о соответствии</small></span></div><div><p className="eyebrow">Документы</p><h2>Документы по товару</h2><p>Запросим у поставщика документы именно для актуальной партии и отправим вместе с подтверждением заказа.</p><Link className="primary-inline" href="/contacts/">Запросить документы<ArrowRight/></Link></div></section>

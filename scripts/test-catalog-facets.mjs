@@ -7,12 +7,20 @@ const item = id => products.find(product => product.id === id);
 const plaster = products.filter(product => product.subgroup === 'Штукатурки');
 const match = selection => plaster.filter(product => matchesFacets(productFacets(product), selection));
 assert.deepEqual(productFacets(item('00876')).application, ['Машинное']);
-assert.deepEqual(productFacets(item('00895')).application, ['Ручное']);
-assert.deepEqual(productFacets(item('01076')).application, ['Ручное', 'Машинное']);
+assert.deepEqual(productFacets(item('00895')).application, ['Ручное', 'Машинное']);
 assert.deepEqual(productFacets(item('05458164740')).base, ['Цементно-гипсовая']);
-assert.equal(productFacets(item('00810')).base, undefined, 'A facade name alone does not prove the binder');
+assert.deepEqual(productFacets(item('00810')).base, ['Цементно-известковая']);
+assert.deepEqual(productFacets(item('00734')).base,['Гипсополимерная']);
+assert.deepEqual(productFacets(item('00911')).base,['Гипсополимерная']);
+assert.deepEqual(productFacets(item('05458166006')).base,['Гипсополимерная']);
+assert.deepEqual(productFacets(item('00727')).base,['Полимерная']);
+assert.deepEqual(productFacets(item('00733')).base,['Цементно-полимерная']);
+assert.deepEqual(productFacets(item('01163')).purpose,['Выравнивающая'],'Finish in a name does not prove finishing purpose');
+assert.deepEqual(productFacets(item('00734')).application,['Ручное'],'Machine sanding does not imply machine application');
+assert.deepEqual(productFacets({...item('00911'),name:'Товар без указания состава'}),productFacets(item('00911')));
+assert.deepEqual(productFacets({name:'Гипсовая штукатурка машинного нанесения'}),{},'Names cannot invent properties');
 assert.ok(match({ base: ['Гипсовая'], application: ['Машинное'] }).some(product => product.id === '00876'));
-assert.ok(!match({ base: ['Гипсовая'], application: ['Машинное'] }).some(product => product.id === '00895'));
+assert.ok(match({ base: ['Гипсовая'], application: ['Машинное'] }).some(product => product.id === '00895'));
 assert.ok(match({ application: ['Ручное', 'Машинное'] }).length > match({ application: ['Машинное'] }).length);
 const definitions = facetDefinitions('Сухие смеси', 'Штукатурки');
 const facets = availableFacets(plaster, definitions, { base: ['Гипсовая'] });
@@ -25,15 +33,17 @@ assert.equal(stockFacets.find(facet => facet.id === 'base').options.find(option 
 assert.deepEqual(readFacetSelection(new URLSearchParams('f_base=Гипсовая&f_base=Гипсовая&f_base=Несуществующая&f_length=25'), facets), { base: ['Гипсовая'] });
 for (const [id, property, expected] of [
   ['00140', 'sheetType', 'Влагостойкий'], ['00142', 'sheetType', 'Обычный'], ['0545816231', 'sheetType', 'Огнестойкий'],
+  ['00711','sheetType','Обычный'],
   ['00141', 'thickness', '9,5'], ['03227', 'thickness', '15'], ['00592', 'profileSize', '50 × 50'],
   ['00833', 'thickness', '0,5'], ['03236', 'profileSize', '100 × 40'], ['01959', 'thickness', '6'],
   ['03302', 'thickness', '30'], ['03233', 'thickness', '100'], ['00971', 'purpose', 'Глубокого проникновения'],
   ['00712', 'purpose', 'Стеклохолст'], ['00712', 'density', '35'], ['00730', 'width', '52'],
-  ['01940', 'material', 'ПВХ-покрытие'], ['03240', 'length', '200'], ['01076', 'base', 'Цементная'],
+  ['01940', 'material', 'ПВХ-покрытие'], ['03240', 'length', '200'],
+  ['00062','profileSize','40 × 20'], ['00062','thickness','2'], ['00062','stockLength','6'],
 ]) assert.ok(productFacets(item(id))[property]?.includes(expected), `${id}: ${property} must include ${expected}`);
 for (const product of products) {
   const selection = productFacets(product);
   assert.ok(matchesFacets(selection, {}), 'No filters retains every product, including unknown properties');
   assert.ok(matchesFacets(selection, selection));
 }
-console.log('Catalog facets: property evidence, combined selection, dynamic counts, URL validation and 330 products passed.');
+console.log(`Catalog facets: official composition, name independence, combined selection, dynamic counts, URLs and ${products.length} products passed.`);
