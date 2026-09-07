@@ -1,11 +1,30 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { assertFacetCoverage } from './catalog-facet-coverage.mjs';
 import { productFacets, matchesFacets, facetDefinitions, availableFacets, readFacetSelection } from '../app/lib/catalog-facets.ts';
 
 const { products } = JSON.parse(await readFile('app/catalog/products.generated.json', 'utf8'));
 const item = id => products.find(product => product.id === id);
 const plaster = products.filter(product => product.subgroup === 'Штукатурки');
 const match = selection => plaster.filter(product => matchesFacets(productFacets(product), selection));
+const facts = JSON.parse(await readFile('catalog/product-facts.json', 'utf8')).products;
+assert.equal(plaster.length, 24);
+for (const product of plaster) assertFacetCoverage(product, facts[product.id]);
+const complete = plaster[0];
+for (const key of ['base', 'application']) {
+  for (const invalid of [undefined, [], ['Не определено']]) {
+    assert.throws(() => assertFacetCoverage({ ...complete, facets: { ...complete.facets, [key]: invalid } }, facts[complete.id]), /Incomplete catalog facets/);
+  }
+}
+assert.throws(() => assertFacetCoverage(complete, {}), /Missing manufacturer evidence/);
+for (const code of ['00907', '01051', '01057']) {
+  assert.deepEqual(productFacets(item(code)).base, ['Гипсовая']);
+  assert.deepEqual(productFacets(item(code)).application, ['Ручное']);
+}
+assert.deepEqual(productFacets(item('01072')).base, ['Цементно-известковая']);
+assert.deepEqual(productFacets(item('01072')).application, ['Ручное', 'Машинное']);
+assert.deepEqual(productFacets(item('01055')).base, ['Цементная']);
+assert.deepEqual(productFacets(item('01055')).application, ['Ручное', 'Машинное']);
 assert.deepEqual(productFacets(item('00876')).application, ['Машинное']);
 assert.deepEqual(productFacets(item('00895')).application, ['Ручное', 'Машинное']);
 assert.deepEqual(productFacets(item('05458164740')).base, ['Цементно-гипсовая']);
@@ -23,6 +42,13 @@ assert.ok(match({ base: ['Гипсовая'], application: ['Машинное'] 
 assert.ok(match({ base: ['Гипсовая'], application: ['Машинное'] }).some(product => product.id === '00895'));
 assert.ok(match({ application: ['Ручное', 'Машинное'] }).length > match({ application: ['Машинное'] }).length);
 const definitions = facetDefinitions('Сухие смеси', 'Штукатурки');
+const allFacets = availableFacets(plaster, definitions, {});
+assert.equal(allFacets.find(facet => facet.id === 'base').options.reduce((sum, option) => sum + option.count, 0), plaster.length);
+for (const key of ['base', 'application']) {
+  const options = allFacets.find(facet => facet.id === key).options;
+  const covered = new Set(options.flatMap(option => match({ [key]: [option.value] }).map(product => product.id)));
+  assert.equal(covered.size, plaster.length, `${key} must cover every plaster, counting overlapping options only once`);
+}
 const facets = availableFacets(plaster, definitions, { base: ['Гипсовая'] });
 assert.equal(facets.find(facet => facet.id === 'application').options.find(option => option.value === 'Машинное').count,
   match({ base: ['Гипсовая'], application: ['Машинное'] }).length);

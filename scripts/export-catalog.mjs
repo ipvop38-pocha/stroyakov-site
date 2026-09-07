@@ -4,6 +4,7 @@ import { classifyProduct } from './catalog-taxonomy.mjs';
 import { catalogInventory } from './catalog-inventory.mjs';
 import { inventoryPresentation, tidyTitle } from './catalog-presentation.mjs';
 import { inventoryFacets } from './catalog-inventory-facets.mjs';
+import { assertFacetCoverage } from './catalog-facet-coverage.mjs';
 
 const read = async file => JSON.parse(await readFile(file, 'utf8'));
 const [snapshot, editorial] = await Promise.all([
@@ -85,6 +86,7 @@ for (const live of selection.products) {
   if (live.code === '03232') delete filterFacts.density; // Warehouse says g/m; area density is unconfirmed.
   const officialKeys = new Set([...(fact?.source?.scope || []), ...(fact?.additionalSources || []).flatMap(source=>source.scope)]);
   for (const key of ['base','application']) if (filterFacts[key] && !officialKeys.has(key)) throw new Error(`Missing manufacturer evidence for ${live.code}: ${key}`);
+  assertFacetCoverage({ code: live.code, subgroup, facets: filterFacts }, fact);
   audit.push({ code:live.code, name, inventoryName:live.rawName, category, subgroup,
     status:fact?.source?(fact.identityNote?'manufacturer-family-matched':'manufacturer-matched'):!brand?'generic-inventory':'manufacturer-page-unresolved',
     officialSource:fact?.source||null,

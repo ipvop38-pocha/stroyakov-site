@@ -1256,9 +1256,41 @@
       }
     },
     "01072": {
-      "title": "Штукатурка Основит Стартвэлл PC21",
-      "facets": {},
-      "reviewStatus": "manufacturer-page-unresolved"
+      "title": "Штукатурка Основит Стартвэлл PC21 цементно-известковая",
+      "facets": {
+        "base": [
+          "Цементно-известковая"
+        ],
+        "application": [
+          "Ручное",
+          "Машинное"
+        ]
+      },
+      "source": {
+        "url": "https://osnovit.ru/catalog/shtukaturki-tsementnye/osnovit-startvell-pc-21-shtukaturka-fasadnaya-mn-N/",
+        "reviewedAt": "2026-09-07",
+        "scope": []
+      },
+      "additionalSources": [
+        {
+          "url": "https://osnovit.ru/catalog/shtukaturki-tsementnye/",
+          "scope": [
+            "base"
+          ],
+          "reviewedAt": "2026-09-07"
+        },
+        {
+          "url": "https://osnovit.ru/upload/iblock/4f0/05_PZ-k-ATR-s-sharnirnoy-sistemoy.pdf",
+          "scope": [
+            "application"
+          ],
+          "pages": [
+            6,
+            11
+          ],
+          "reviewedAt": "2026-09-07"
+        }
+      ]
     },
     "01066": {
       "title": "Штукатурка Основит Стартвэлл PC22 H цементная",
@@ -1302,9 +1334,23 @@
       "identityNote": "Warehouse packaging is 25 kg; current manufacturer card is 30 kg. Only shared binder and application method are used; inventory packaging is retained."
     },
     "00907": {
-      "title": "Штукатурка Русгипс Старт",
-      "facets": {},
-      "reviewStatus": "manufacturer-page-unresolved"
+      "title": "Штукатурка Русгипс Старт гипсовая",
+      "facets": {
+        "base": [
+          "Гипсовая"
+        ],
+        "application": [
+          "Ручное"
+        ]
+      },
+      "source": {
+        "url": "https://mgzgips.ru/produktsiya/shtukaturki/shtukaturka-gipsovaya-ruchnogo-naneseniya-rusgips-plaster-34",
+        "reviewedAt": "2026-09-07",
+        "scope": [
+          "base",
+          "application"
+        ]
+      }
     },
     "01043": {
       "title": "Гипс строительный Хабез",
@@ -1332,19 +1378,93 @@
       "reviewStatus": "manufacturer-page-unresolved"
     },
     "01057": {
-      "title": "Штукатурка Хабез Синдика",
-      "facets": {},
-      "reviewStatus": "manufacturer-page-unresolved"
+      "title": "Штукатурка Хабез Синдика гипсовая",
+      "facets": {
+        "base": [
+          "Гипсовая"
+        ],
+        "application": [
+          "Ручное"
+        ]
+      },
+      "source": {
+        "url": "https://st13.stpulscen.ru/images/product/405/633/120_original.jpg",
+        "reviewedAt": "2026-09-07",
+        "scope": [
+          "base",
+          "application"
+        ],
+        "kind": "manufacturer-packaging",
+        "hostPage": "https://www.konstruktor-krd.ru/goods/187635948-shtukaturka_gipsovaya_ruchnogo_naneseniya_habez_cindika"
+      },
+      "identityNote": "Manufacturer packaging photograph is 25 kg; warehouse SKU explicitly specifies Sindika РН, 30 kg. Only gypsum binder and manual application are taken from the matching РН family; warehouse package size is retained.",
+      "additionalSources": [
+        {
+          "url": "https://habez-gips.ru/assets/templates/habez/img/cert-7.jpg?v=1751643268",
+          "scope": [
+            "base",
+            "application"
+          ],
+          "reviewedAt": "2026-09-07",
+          "kind": "manufacturer-archive",
+          "note": "Archived certificate (2021–2024) explicitly identifies Start and Sindika as gypsum plasters for manual application. Used only to corroborate product identity and packaging, not to claim current certification."
+        }
+      ]
     },
     "01051": {
-      "title": "Штукатурка Хабез Старт",
-      "facets": {},
-      "reviewStatus": "manufacturer-page-unresolved"
+      "title": "Штукатурка Хабез Старт гипсовая",
+      "facets": {
+        "base": [
+          "Гипсовая"
+        ],
+        "application": [
+          "Ручное"
+        ]
+      },
+      "source": {
+        "url": "https://st33.stpulscen.ru/images/product/588/686/666_original.webp",
+        "reviewedAt": "2026-09-07",
+        "scope": [
+          "base",
+          "application"
+        ],
+        "kind": "manufacturer-packaging",
+        "hostPage": "https://www.konstruktor-krd.ru/goods/187635950-shtukaturka_gipsovaya_ruchnogo_naneseniya_habez_start"
+      },
+      "additionalSources": [
+        {
+          "url": "https://habez-gips.ru/assets/templates/habez/img/cert-7.jpg?v=1751643268",
+          "scope": [
+            "base",
+            "application"
+          ],
+          "reviewedAt": "2026-09-07",
+          "kind": "manufacturer-archive",
+          "note": "Archived certificate (2021–2024) explicitly identifies Start and Sindika as gypsum plasters for manual application. Used only to corroborate product identity and packaging, not to claim current certification."
+        }
+      ]
     },
     "01055": {
-      "title": "Штукатурка Хабез Жане",
-      "facets": {},
-      "reviewStatus": "manufacturer-page-unresolved"
+      "title": "Штукатурка Хабез Жане цементная",
+      "facets": {
+        "base": [
+          "Цементная"
+        ],
+        "application": [
+          "Ручное",
+          "Машинное"
+        ]
+      },
+      "source": {
+        "url": "https://cdn.lemanapro.ru/lmru/image/upload/c_pad/q_auto/f_auto/w_1000/h_1000/v1668683739/lmcode/6rmJFMhegUuPPUVVZhxd-g/81933501.png",
+        "reviewedAt": "2026-09-07",
+        "scope": [
+          "base",
+          "application"
+        ],
+        "kind": "manufacturer-packaging",
+        "hostPage": "https://krasnodar.lemanapro.ru/product/shtukaturka-cementnaya-habez-zhane-10-mm-25-kg-81933501/"
+      }
     },
     "0545750": {
       "title": "Стяжка Хабез",
