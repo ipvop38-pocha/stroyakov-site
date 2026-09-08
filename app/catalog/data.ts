@@ -27,7 +27,7 @@ export const catalogCategories = [
   { name: 'ЛКМ и грунтовки', slug: 'paint', note: 'Краски, эмали и подготовка основания', image: '/assets/categories/paint-v1.png' },
   { name: 'Гидроизоляция и кровля', slug: 'waterproofing', note: 'Мастики, мембраны и кровельные материалы', image: '/assets/categories/waterproofing-v1.png' },
   { name: 'Пены и герметики', slug: 'foam', note: 'Монтажные пены и герметики', image: '/assets/categories/foam-v1.png' },
-  { name: 'Сетки и ленты', slug: 'meshes-tapes', note: 'Армирующие сетки, стеклохолст и ленты', image: '/assets/categories/mesh-blue-photo.webp' },
+  { name: 'Сетки и ленты', slug: 'meshes-tapes', note: 'Армирующие сетки, стеклохолст и ленты', image: '/assets/categories/meshes-tapes-v1.png' },
   { name: 'Инструмент и расходники', slug: 'tools', note: 'Кисти, валики, шпатели и перчатки', image: '/assets/categories/tools-v1.png' },
   { name: 'Прочие материалы', slug: 'other', note: 'Дополнительные товары для объекта', image: '/assets/categories/all.png' },
 ];

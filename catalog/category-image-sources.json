@@ -1,7 +1,17 @@
 {
   "reviewedAt": "2026-09-08",
-  "mode": "Original product photographs displayed together with CSS; source image files are unchanged",
+  "mode": "Generated photorealistic studio composition with original transparent alpha; no pixel edits",
   "images": [
+    {
+      "asset": "/assets/categories/meshes-tapes-v1.png",
+      "product": "Синяя фасадная стеклосетка, сварная металлическая сетка и ленты",
+      "generator": "ChatGPT browser image generation",
+      "width": 1254,
+      "height": 1254,
+      "alpha": true
+    }
+  ],
+  "retiredPhotographs": [
     {
       "asset": "/assets/categories/mesh-blue-photo.webp",
       "product": "Синяя фасадная сетка PROFFIT",

@@ -39,10 +39,11 @@ export function facetDefinitions(category: string, subgroup: string, tileContext
   const groups: Record<string, string[]> = schema.groups;
   const labels: Record<string, string> = schema.labels;
   const help: Record<string, string> = schema.help;
+  const groupHelp: Record<string, Record<string, string>> = schema.groupHelp;
   const overrides: Record<string, Record<string, string>> = schema.groupLabels;
   const ids = groups[subgroup] || (category === "Цемент" ? groups["Цемент"] : []);
   return ids.map(id => id === "tileFormat" ? { id: `tileSize_${tileContext}`, label: "Размер керамогранита, см", help: "Выберите свой формат: покажем клеи, для которых он подтверждён инструкцией или таблицей производителя. Учитываем место укладки. Для керамической плитки ограничения могут отличаться; совместимость с основанием проверяется отдельно." } :
-    { id, label: overrides[subgroup]?.[id] || labels[id], ...(help[id] ? { help: help[id] } : {}) });
+    { id, label: overrides[subgroup]?.[id] || labels[id], ...((groupHelp[subgroup]?.[id] || help[id]) ? { help: groupHelp[subgroup]?.[id] || help[id] } : {}) });
 }
 
 export function matchesFacets(properties: FacetSelection, selection: FacetSelection, except?: string) {
@@ -64,7 +65,9 @@ export function availableFacets(products: FacetProduct[], definitions: FacetDefi
 
 export function readFacetSelection(params: URLSearchParams, facets: CatalogFacet[]): FacetSelection {
   return Object.fromEntries(facets.flatMap(facet => {
-    const values = [...new Set(params.getAll(`f_${facet.id}`))].filter(value => facet.options.some(option => option.value === value));
+    const values = [...new Set(params.getAll(`f_${facet.id}`).map(value =>
+      facet.id === "purpose" && ["Фасадная сетка", "Штукатурная сетка"].includes(value) && facet.options.some(option => option.value === "Штукатурная / фасадная")
+        ? "Штукатурная / фасадная" : value))].filter(value => facet.options.some(option => option.value === value));
     return values.length ? [[facet.id, values]] : [];
   }));
 }

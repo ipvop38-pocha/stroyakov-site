@@ -6558,14 +6558,6 @@ summary:focus-visible {
 .tile-context { display: grid; gap: 7px; margin-bottom: 20px; font-size: 12px; font-weight: 600; }
 .tile-context select { min-width: 0; width: 100%; min-height: 42px; border: 1px solid var(--border); border-radius: 8px; background: #fff; padding: 8px; color: var(--ink); font: inherit; }
 .tile-context select:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
-.mesh-category-art { position: absolute; inset: 0; display: block; max-width: 110px; margin: auto; isolation: isolate; }
-.mesh-category-art > span { position: absolute; display: block; overflow: hidden; background: #fff; }
-.mesh-category-art .mesh-photo-blue { left: 0; top: 0; width: 60%; height: 94%; border-radius: 7px 10px 4px 5px; }
-.mesh-category-art .mesh-photo-welded { right: 0; top: 12%; width: 48%; height: 63%; border-radius: 5px; }
-.mesh-category-art .mesh-photo-tapes { right: 0; bottom: 0; width: 52%; height: 47%; border-radius: 10px 4px 7px 4px; }
-.directory-card .mesh-category-art img { object-fit: cover; filter: none; }
-.directory-card:hover .mesh-category-art img { transform: none; }
-.directory-card .mesh-photo-tapes img { object-fit: contain; }
 .property-filter label { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; align-items: center; gap: 9px; min-height: 36px; font-size: 12px; line-height: 1.4; cursor: pointer; }
 .property-filter input { width: 16px; height: 16px; margin: 0; accent-color: var(--brand); cursor: pointer; }
 .property-filter input:focus-visible { outline: 3px solid rgba(242, 13, 24, .28); outline-offset: 3px; }

@@ -21,6 +21,15 @@ for (const code of ['02597','03133','02297','03247','03240']) {
  assert.equal(item(code).unit,'шт.','Retail price and quantity must remain per piece');
 }
 assert.equal(ps.length,427);
+assert.deepEqual(item('03251').facets.material,['Полиакрил']);
+const meshes=ps.filter(p=>p.subgroup==='Сетки и стеклохолст');
+const meshDefs=facetDefinitions('Сетки и ленты','Сетки и стеклохолст');
+const meshOptions=availableFacets(meshes,meshDefs,{});
+const sharedMeshes=meshes.filter(p=>matchesFacets(p.facets,{purpose:['Штукатурная / фасадная']}));
+assert.deepEqual(new Set(sharedMeshes.map(p=>p.code)),new Set(['01858','01968','03254','01561','03218','01684','03232']));
+assert.equal(sharedMeshes.filter(p=>matchesFacets(p.facets,{density:['160']})).length,2,'Density must still narrow the combined group');
+for(const oldValue of ['Фасадная сетка','Штукатурная сетка']) assert.deepEqual(readFacetSelection(new URLSearchParams({f_purpose:oldValue}),meshOptions),{purpose:['Штукатурная / фасадная']},'Saved mesh filter links remain usable');
+assert.ok(meshDefs.find(f=>f.id==='purpose').help.includes('подтверждена производителем'));
 assert.deepEqual(new Set(ps.map(p=>p.subgroup)),new Set(Object.keys(schema.groups)),'Every existing subgroup has a reviewed schema');
 for(const [group,keys] of Object.entries(schema.groups)){
  const members=ps.filter(p=>p.subgroup===group);const defs=facetDefinitions(members[0].category,group);

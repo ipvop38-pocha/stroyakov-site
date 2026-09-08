@@ -58,8 +58,7 @@ export function inventoryFacets(product) {
   if (product.subgroup === "Сетки и стеклохолст") {
     if (/стеклохолст/.test(name)) set("purpose", "Стеклохолст");
     else if (/кладочн/.test(name)) set("purpose", "Кладочная сетка");
-    else if (/фасадн/.test(name)) set("purpose", "Фасадная сетка");
-    else if (/штукатурн/.test(name)) set("purpose", "Штукатурная сетка");
+    else if (/фасадн|штукатурн/.test(name)) set("purpose", "Штукатурная / фасадная");
     else if (/малярн/.test(name)) set("purpose", "Малярная сетка");
     const density = name.match(/(\d+)\s*г(?:р)?\s*\/?м|фасадная\s+(145|160)/);
     if (density) set("density", density[1] || density[2]);

@@ -1196,6 +1196,23 @@
           "note": "Manufacturer Delux, REFIT B1 R82UB1, output 45 L. Existing warehouse net weight 820 g retained; 1000 ml container capacity is not substituted for net mass."
         }
       ]
+    },
+    "03251": {
+      "facets": {
+        "material": [
+          "Полиакрил"
+        ]
+      },
+      "sources": [
+        {
+          "url": "https://derzhitools.ru/Derzhi2025.pdf",
+          "reviewedAt": "2026-09-08",
+          "scope": [
+            "material"
+          ],
+          "note": "Official catalog 2025, page 22. Exact warehouse article 8202-618: yellow-stripe roller, 40×180 mm, nap 12 mm, frame 6 mm. Table and material caption visually checked."
+        }
+      ]
     }
   }
 }
