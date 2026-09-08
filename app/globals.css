@@ -234,13 +234,16 @@ summary:focus-visible {
   left: 0;
   width: 100%;
   padding: 8px;
+  max-height: min(520px, 65dvh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   border: 1px solid var(--border);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.98);
   box-shadow: 0 18px 40px rgba(17, 19, 21, 0.14);
 }
 
-.search-results button {
+.search-results a {
   width: 100%;
   min-height: 58px;
   padding: 10px 12px;
@@ -252,15 +255,27 @@ summary:focus-visible {
   border-radius: 10px;
   background: transparent;
   text-align: left;
+  text-decoration: none;
+  color: var(--ink);
 }
 
-.search-results button:hover {
+.search-results a:hover,
+.search-results a:focus-visible {
   background: var(--brand-soft);
 }
 
-.search-results button span {
+.search-results a:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+.search-shortcuts { padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px solid var(--border); }
+.search-results .search-shortcut { background: var(--brand-soft); gap: 10px; }
+.search-shortcut > svg { flex: 0 0 20px; width: 20px; height: 20px; color: var(--brand); }
+.search-shortcut > span { flex: 1; }
+.search-shortcuts a + a { margin-top: 4px; }
+
+.search-results a span {
   display: grid;
   gap: 3px;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .search-results b {
@@ -2040,10 +2055,10 @@ summary:focus-visible {
 
   .mobile-search .search-results {
     top: 54px;
-    width: 358px;
+    width: 100%;
   }
 
-  .mobile-search .search-results button {
+  .mobile-search .search-results a {
     min-height: 54px;
     gap: 10px;
   }

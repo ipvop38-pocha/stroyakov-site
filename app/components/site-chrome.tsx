@@ -15,11 +15,11 @@ import {
   User,
   X,
 } from "@phosphor-icons/react";
-import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
-import { catalogProducts } from "../catalog/data";
+import { FocusEvent, FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import { catalogCategories, catalogProducts } from "../catalog/data";
 import { COMMERCE_CHANGE_EVENT, readCommerceSummary } from "../lib/commerce";
 import { productPriceText, productStockText } from "../lib/product-presentation";
-import { matchesProductSearch } from "../lib/product-search";
+import { catalogSearchShortcuts, matchesProductSearch } from "../lib/product-search";
 
 export function SiteChrome({ children, active = "" }: { children: ReactNode; active?: string }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -27,6 +27,7 @@ export function SiteChrome({ children, active = "" }: { children: ReactNode; act
   const [searchOpen, setSearchOpen] = useState(false);
   const [commerce, setCommerce] = useState({ cartCount: 0, cartTotal: 0, favoritesCount: 0 });
   const suggestions = useMemo(() => query.trim() ? catalogProducts.filter(product => matchesProductSearch(product, query)).slice(0, 5) : [], [query]);
+  const shortcuts = useMemo(() => catalogSearchShortcuts(catalogProducts, catalogCategories, query), [query]);
 
   useEffect(() => {
     setQuery(new URL(window.location.href).searchParams.get("q") || "");
@@ -48,9 +49,18 @@ export function SiteChrome({ children, active = "" }: { children: ReactNode; act
     window.location.href = value ? `/catalog/?q=${encodeURIComponent(value)}` : "/catalog/";
   }
 
-  function SearchSuggestions() {
+  function closeSearchOnBlur(event: FocusEvent<HTMLFormElement>) {
+    if (!event.currentTarget.contains(event.relatedTarget)) setSearchOpen(false);
+  }
+
+  function searchSuggestions() {
     if (!searchOpen || !query.trim()) return null;
-    return <div className="search-results">{suggestions.length ? suggestions.map(product => <button key={product.id} onMouseDown={() => { window.location.href = `/product/${product.slug}/`; }} type="button"><span><b>{product.name}</b><small>{product.brand || product.category} · {productStockText(product)}</small></span><strong>{productPriceText(product.price)}</strong></button>) : <p>По вашему запросу ничего не найдено</p>}</div>;
+    // Full navigation also reapplies URL filters when already on the catalog page.
+    return <div className="search-results">
+      {shortcuts.length > 0 && <nav className="search-shortcuts" aria-label="Быстрые переходы в каталог">{shortcuts.map(shortcut => <a className="search-shortcut" key={shortcut.href} href={shortcut.href}><GridFour aria-hidden weight="bold"/><span><b>{shortcut.name}</b><small>{shortcut.kind === "brand" ? "Все товары бренда" : "Раздел каталога"} · {shortcut.count} поз.</small></span><ArrowRight aria-hidden/></a>)}</nav>}
+      {suggestions.map(product => <a key={product.id} href={`/product/${product.slug}/`}><span><b>{product.name}</b><small>{product.brand || product.category} · {productStockText(product)}</small></span><strong>{productPriceText(product.price)}</strong></a>)}
+      {!suggestions.length && !shortcuts.length && <p>По вашему запросу ничего не найдено</p>}
+    </div>;
   }
 
   return (
@@ -71,10 +81,10 @@ export function SiteChrome({ children, active = "" }: { children: ReactNode; act
             <Image alt="Строяков — мы снабжаем" height={40} priority src="/assets/logo-header.png" width={144} />
           </Link>
           <Link className="catalog-button" href="/catalog/">Каталог <List aria-hidden weight="bold" /></Link>
-          <form className="header-search" onSubmit={submitSearch}>
+          <form className="header-search" onSubmit={submitSearch} onBlur={closeSearchOnBlur} onKeyDown={event => { if (event.key === "Escape") setSearchOpen(false); }}>
             <MagnifyingGlass aria-hidden weight="bold" />
-            <input aria-label="Поиск по каталогу" onBlur={() => window.setTimeout(() => setSearchOpen(false), 120)} onChange={(event) => { setQuery(event.target.value); setSearchOpen(true); }} onFocus={() => setSearchOpen(true)} placeholder="Найти товар, бренд или категорию" value={query} />
-            <SearchSuggestions />
+            <input aria-label="Поиск по каталогу" autoComplete="off" onChange={(event) => { setQuery(event.target.value); setSearchOpen(true); }} onFocus={() => setSearchOpen(true)} placeholder="Найти товар, бренд или категорию" value={query} />
+            {searchSuggestions()}
           </form>
           <div className="header-actions">
             <Link aria-label="Войти в личный кабинет" href="/account/"><User aria-hidden /><span><small>Профиль</small><b>Войти</b></span></Link>
@@ -84,10 +94,10 @@ export function SiteChrome({ children, active = "" }: { children: ReactNode; act
           <Link aria-label={`Открыть корзину, товаров: ${commerce.cartCount}`} className="mobile-round-button" href="/cart/"><ShoppingCartSimple aria-hidden weight="bold" />{commerce.cartCount > 0 && <span>{commerce.cartCount}</span>}</Link>
           <button aria-label="Открыть меню" className="mobile-menu-button" onClick={() => setMenuOpen(true)} type="button"><List aria-hidden weight="bold" /></button>
         </div>
-        <form className="mobile-search" onSubmit={submitSearch}>
+        <form className="mobile-search" onSubmit={submitSearch} onBlur={closeSearchOnBlur} onKeyDown={event => { if (event.key === "Escape") setSearchOpen(false); }}>
           <MagnifyingGlass aria-hidden weight="bold" />
-          <input aria-label="Поиск по каталогу" onBlur={() => window.setTimeout(() => setSearchOpen(false), 120)} onChange={(event) => { setQuery(event.target.value); setSearchOpen(true); }} onFocus={() => setSearchOpen(true)} placeholder="Найти товар, бренд или категорию" value={query} />
-          <SearchSuggestions />
+          <input aria-label="Поиск по каталогу" autoComplete="off" onChange={(event) => { setQuery(event.target.value); setSearchOpen(true); }} onFocus={() => setSearchOpen(true)} placeholder="Найти товар, бренд или категорию" value={query} />
+          {searchSuggestions()}
         </form>
       </header>
 

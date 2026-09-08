@@ -13,6 +13,9 @@ const aliases: Record<string, string[]> = {
   гкл: ['гипсокартон'],
   danogips: ['даногипс'],
   rusgips: ['русгипс'],
+  roks: ['рокс'],
+  knauf: ['кнауф'],
+  ceresit: ['церезит'],
   ultradecor: ['ультрадекор'],
   осб: ['osb'],
   осп: ['osb'],
@@ -58,4 +61,30 @@ export function matchesProductSearch(product: SearchableProduct, query: string):
     if (/^\d/.test(term)) return word === term;
     return word === term || (term.length >= 4 && word.startsWith(term)) || oneTypo(term, word);
   }));
+}
+
+type CatalogSearchProduct = SearchableProduct & { category: string; subgroup: string };
+export type CatalogSearchShortcut = { name: string; kind: 'category' | 'group' | 'brand'; count: number; href: string };
+
+// Match the section/brand itself, so a product query does not suggest unrelated brands.
+export function catalogSearchShortcuts(products: CatalogSearchProduct[], categories: { name: string; slug: string }[], query: string): CatalogSearchShortcut[] {
+  const requested = tokens(query).join(' ');
+  if (requested.length < 2) return [];
+  const targets: CatalogSearchShortcut[] = [];
+  const add = (name: string, kind: CatalogSearchShortcut['kind'], members: CatalogSearchProduct[], params: Record<string, string>) => {
+    if (members.length && matchesProductSearch({ name }, query)) targets.push({ name, kind, count: members.length, href: `/catalog/?${new URLSearchParams(params)}#products` });
+  };
+  for (const category of categories) {
+    const members = products.filter(product => product.category === category.name);
+    add(category.name, 'category', members, { category: category.slug });
+    for (const group of new Set(members.map(product => product.subgroup))) {
+      if (group === category.name) continue;
+      add(group, 'group', members.filter(product => product.subgroup === group), { category: category.slug, group });
+    }
+  }
+  for (const brand of new Set(products.map(product => product.brand).filter((value): value is string => Boolean(value)))) {
+    add(brand, 'brand', products.filter(product => product.brand === brand), { brand });
+  }
+  return targets.sort((a, b) => Number(tokens(b.name).join(' ') === requested) - Number(tokens(a.name).join(' ') === requested) ||
+    a.name.length - b.name.length || b.count - a.count || a.name.localeCompare(b.name, 'ru')).slice(0, 3);
 }
