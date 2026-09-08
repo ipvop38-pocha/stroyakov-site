@@ -7,6 +7,19 @@ import {selectionInventoryFacets} from './catalog-selection-facets.mjs';
 import {productFacets,brandFilterValue,availableFacets,facetDefinitions,matchesFacets,readFacetSelection} from '../app/lib/catalog-facets.ts';
 const ps=JSON.parse(fs.readFileSync('app/catalog/products.generated.json','utf8')).products;
 const item=code=>ps.find(p=>p.code===code);
+for (const code of ['01048','01050','01047']) assert.deepEqual(item(code).facets.sheetSize,['2500 × 1200']);
+for (const code of ['0545816327','0545816328']) assert.deepEqual(item(code).facets.thickness,['2']);
+assert.deepEqual(item('03255').facets.stockLength,['6']);
+for (const code of ['00861','01662','01549']) assert.deepEqual(item(code).facets.stockLength,['3']);
+for (const code of ['01680','01705']) {
+ assert.deepEqual(item(code).facets.diameter,['3,5']);
+ assert.deepEqual(item(code).facets.fastenerType,['TN']);
+}
+assert.deepEqual(item('02089').facets.season,['Всесезонная']);
+for (const code of ['02597','03133','02297','03247','03240']) {
+ assert.deepEqual(item(code).facets.packing,['Поштучно']);
+ assert.equal(item(code).unit,'шт.','Retail price and quantity must remain per piece');
+}
 assert.equal(ps.length,427);
 assert.deepEqual(new Set(ps.map(p=>p.subgroup)),new Set(Object.keys(schema.groups)),'Every existing subgroup has a reviewed schema');
 for(const [group,keys] of Object.entries(schema.groups)){

@@ -1145,6 +1145,57 @@
           "note": "Exact №30 product; manufacturer specifies 20 kg, own warehouse title has no competing pack size."
         }
       ]
+    },
+    "01680": {
+      "facets": {
+        "diameter": [
+          "3,5"
+        ]
+      },
+      "sources": [
+        {
+          "url": "https://knauf.com/ru-KZ/p/produkt/shurup-samonarezayushchiy-prokalyvayushchiy-tn-10818_0268",
+          "reviewedAt": "2026-09-08",
+          "scope": [
+            "diameter"
+          ],
+          "note": "Owner confirmed TN sharp-point series. Official dimensions 3.5×25 and 3.5×35; warehouse packaging retained."
+        }
+      ]
+    },
+    "01705": {
+      "facets": {
+        "diameter": [
+          "3,5"
+        ]
+      },
+      "sources": [
+        {
+          "url": "https://knauf.com/ru-KZ/p/produkt/shurup-samonarezayushchiy-prokalyvayushchiy-tn-10818_0268",
+          "reviewedAt": "2026-09-08",
+          "scope": [
+            "diameter"
+          ],
+          "note": "Owner confirmed TN sharp-point series. Official dimensions 3.5×25 and 3.5×35; warehouse packaging retained."
+        }
+      ]
+    },
+    "02089": {
+      "facets": {
+        "season": [
+          "Всесезонная"
+        ]
+      },
+      "sources": [
+        {
+          "url": "https://pena-delux.ru/catalog/spetsialnaya-pena/pena-montazhnaya-ognestoykaya-refit/",
+          "reviewedAt": "2026-09-08",
+          "scope": [
+            "season"
+          ],
+          "note": "Manufacturer Delux, REFIT B1 R82UB1, output 45 L. Existing warehouse net weight 820 g retained; 1000 ml container capacity is not substituted for net mass."
+        }
+      ]
     }
   }
 }

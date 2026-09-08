@@ -19,6 +19,7 @@ const labinsk = await read('private/moysklad/labinsk-metal-snapshot.json');
 const factRegistry = await read('catalog/product-facts.json');
 const facts = factRegistry.products;
 const selectionFacts = (await read('catalog/selection-facts.json')).products;
+const warehouseConfirmations = await read('catalog/warehouse-confirmations.json');
 const titles = await read('catalog/title-overrides.json');
 const selection = catalogInventory(snapshot, labinsk);
 const popularity = new Map(merchandising.rankedIds.map((code, index) => [code, merchandising.rankedIds.length - index]));
@@ -82,12 +83,13 @@ for (const live of selection.products) {
   const entry = curated.get(live.code);
   const fact = facts[live.code];
   const selectionFact = selectionFacts[live.code];
+  const warehouseFact = warehouseConfirmations.products[live.code];
   const { category, subgroup, productKind: kind } = classifyProduct(live);
-  if (!titles[live.code] && !fact?.title && category !== 'Металлопрокат' && !['Саморезы','Стеновые профили','Потолочные профили','Маяки металлические'].includes(subgroup)) throw new Error(`Title review required: ${live.code}`);
+  if (!warehouseFact?.title && !titles[live.code] && !fact?.title && category !== 'Металлопрокат' && !['Саморезы','Стеновые профили','Потолочные профили','Маяки металлические'].includes(subgroup)) throw new Error(`Title review required: ${live.code}`);
   const brand = entry?.brand || fact?.brand || brandFor(original);
   const presented = inventoryPresentation(live, category, subgroup, brand, live.rawName);
-  const name = tidyTitle(titles[live.code] || (fact?.title ? [fact.title, ...presented.packing].join(', ') : presented.name));
-  const filterFacts = { ...inventoryFacets({ name: live.rawName, category, subgroup, specs: entry?.specs || [] }), ...presented.facets, ...(fact?.facets || {}), ...selectionInventoryFacets({ name, inventoryName: live.rawName, category, subgroup }), ...(selectionFact?.facets || {}) };
+  const name = tidyTitle(warehouseFact?.title || titles[live.code] || (fact?.title ? [fact.title, ...presented.packing].join(', ') : presented.name));
+  const filterFacts = { ...inventoryFacets({ name: live.rawName, category, subgroup, specs: entry?.specs || [] }), ...presented.facets, ...(fact?.facets || {}), ...selectionInventoryFacets({ name, inventoryName: live.rawName, category, subgroup }), ...(selectionFact?.facets || {}), ...(warehouseFact?.facets || {}) };
   if (live.code === '03232') delete filterFacts.density; // Warehouse says g/m; area density is unconfirmed.
   const officialKeys = new Set([...(fact?.source?.scope || []), ...(fact?.additionalSources || []).flatMap(source=>source.scope), ...(selectionFact?.sources || []).flatMap(source=>source.scope)]);
   for (const key of ['base','application']) if (filterFacts[key] && !officialKeys.has(key)) throw new Error(`Missing manufacturer evidence for ${live.code}: ${key}`);
@@ -98,6 +100,7 @@ for (const live of selection.products) {
     officialSource:fact?.source||selectionFact?.sources?.[0]||null,
     additionalSources:[...(fact?.additionalSources||[]),...(selectionFact?.sources||[])],
     identityNote:fact?.identityNote||null,
+    warehouseConfirmation:warehouseFact ? {reviewedAt:warehouseConfirmations.reviewedAt,source:warehouseConfirmations.source,properties:Object.keys(warehouseFact.facets)} : null,
     inventoryProperties:Object.keys(filterFacts).filter(key=>!officialKeys.has(key)),
     missingSemanticProperties:/Штукатурки|Шпаклёвки/.test(subgroup)?['base','application'].filter(key=>!filterFacts[key]):[],
     reference:!brand&&/Трубы|Саморезы/.test(subgroup)?'Saturn naming pattern; only own inventory dimensions and packaging are used':null,
@@ -129,6 +132,7 @@ for (const live of selection.products) {
 }
 if (output.length !== selection.products.length) throw new Error('Catalog count mismatch.');
 for (const product of output) {
+  if (product.facets.packing?.includes('Поштучно') && product.unit !== 'шт.') throw new Error(`Piece sale requires piece stock/price unit: ${product.code}`);
   if (!product.specs.every(row => Array.isArray(row) && row.length === 2 && row.every(value => typeof value === 'string'))) throw new Error(`Invalid specification tuple: ${product.code}`);
   if (!Object.values(product.facets).every(values => Array.isArray(values) && values.every(value => typeof value === 'string'))) throw new Error(`Invalid facet values: ${product.code}`);
 }
