@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!product) return { title: "Товар не найден — СТРОЯКОВ" };
   return {
     title: `${product.name} — купить в Краснодаре | СТРОЯКОВ`,
-    description: `${product.name}: характеристики и цена за ${product.unit}. Поможем рассчитать количество и подобрать сопутствующие материалы. Доставка и самовывоз.`,
+    description: `${product.quickDescription} Характеристики, цена и наличие в СТРОЯКОВ.`,
   };
 }
 

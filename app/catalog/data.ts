@@ -10,6 +10,9 @@ export type CatalogProduct = {
   stock: number | null; popularity: number; price: number | null; oldPrice?: number;
   unit: string; image: string | null; code: string; searchAliases?: string[];
   quickDescription: string; description?: string; specs?: [string, string][];
+  applicationNotes?: string[]; unresolvedSpecs?: string[];
+  documents?: { url: string; label: string; kind: string }[];
+  manufacturerUrl?: string; contentReviewedAt?: string;
   photoStyle?: string; variantGroup?: string; variantLabel?: string;
   calculator?: ProductCalculator; comparisonGroup?: string; companionIds?: string[];
   facets?: Record<string, string[]>; stockLocation?: string;

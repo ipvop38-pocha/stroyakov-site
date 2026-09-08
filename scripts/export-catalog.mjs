@@ -7,6 +7,7 @@ import { inventoryFacets } from './catalog-inventory-facets.mjs';
 import { assertFacetCoverage } from './catalog-facet-coverage.mjs';
 import { selectionInventoryFacets } from './catalog-selection-facets.mjs';
 import { completeSelectionFacets, selectionCoverageReport } from './catalog-selection-coverage.mjs';
+import { buildProductContent } from './catalog-product-content.mjs';
 
 const read = async file => JSON.parse(await readFile(file, 'utf8'));
 const [snapshot, editorial] = await Promise.all([
@@ -63,16 +64,6 @@ function slugFor(code, title) {
   return `${code}-${translit || 'product'}`;
 }
 
-const quickByCategory = {
-  'Сухие смеси': 'Сухая строительная смесь. Поможем проверить назначение, фасовку и расход для вашего основания.',
-  'Гипсокартон и листовые': 'Листовой материал для строительных работ. Проверим размер, толщину и количество перед отгрузкой.',
-  'Металлопрокат': 'Металлопрокат для строительных и монтажных работ. Уточним размер, длину и доступный остаток.',
-  'Профили и комплектующие': 'Элемент каркасной или штукатурной системы. Поможем подобрать совместимые комплектующие.',
-};
-function genericCopy(title, category) {
-  return `${title} — позиция раздела «${category}». Цена указана за единицу продажи. Перед оплатой менеджер подтвердит наличие и поможет проверить исполнение товара для вашей задачи.`;
-}
-
 const previousCatalog = await read('app/catalog/products.generated.json');
 const previousProducts = new Map(previousCatalog.products.map(p => [p.code, p]));
 const output = [];
@@ -91,6 +82,7 @@ for (const live of selection.products) {
   const name = tidyTitle(warehouseFact?.title || titles[live.code] || (fact?.title ? [fact.title, ...presented.packing].join(', ') : presented.name));
   const filterFacts = { ...inventoryFacets({ name: live.rawName, category, subgroup, specs: entry?.specs || [] }), ...presented.facets, ...(fact?.facets || {}), ...selectionInventoryFacets({ name, inventoryName: live.rawName, category, subgroup }), ...(selectionFact?.facets || {}), ...(warehouseFact?.facets || {}) };
   if (live.code === '03232') delete filterFacts.density; // Warehouse says g/m; area density is unconfirmed.
+  if (live.code === '00952') filterFacts.packing = ['20 кг']; // Reviewed title; "8 кг" is an inventory parsing artefact.
   const officialKeys = new Set([...(fact?.source?.scope || []), ...(fact?.additionalSources || []).flatMap(source=>source.scope), ...(selectionFact?.sources || []).flatMap(source=>source.scope)]);
   for (const key of ['base','application']) if (filterFacts[key] && !officialKeys.has(key)) throw new Error(`Missing manufacturer evidence for ${live.code}: ${key}`);
   assertFacetCoverage({ code: live.code, subgroup, facets: filterFacts }, fact);
@@ -121,9 +113,7 @@ for (const live of selection.products) {
     facets: filterFacts,
     popularity: popularity.get(live.code) || 0,
     searchAliases: [...new Set([...(entry?.searchAliases || []), live.rawName, live.categoryPath, kind, subgroup, ...Object.values(filterFacts).flat()])],
-    quickDescription: entry?.quickDescription || quickByCategory[category] || `Товар из раздела «${category}». Уточним параметры и совместимость перед заказом.`,
-    description: entry?.description || genericCopy(name, category),
-    specs: entry?.specs || [['Код товара', live.code], ['Раздел', kind]],
+    ...buildProductContent({code:live.code, name, category, subgroup, facets:filterFacts}, {fact, selectionFact, editorial:entry, warehouseFact}),
     ...(entry?.variantGroup ? { variantGroup: entry.variantGroup, variantLabel: entry.variantLabel } : {}),
     ...(entry?.calculator ? { calculator: entry.calculator } : {}),
     ...(live.code === '00876' ? { companionIds: ['00971','00859','00668'] } : {}),
@@ -141,7 +131,7 @@ output.sort((left, right) => right.popularity - left.popularity);
 await writeFile('app/catalog/products.generated.json', JSON.stringify({ updatedAt: snapshot.completedAt, stockMoment: snapshot.stockMoment, labinskStockMoment:labinsk.stockMoment, selectedProducts: snapshot.products.length + labinsk.products.length, hiddenOperationalItems, hiddenByPolicy, products: output }, null, 2) + '\n');
 const queue = output.filter(product => !product.image || !curated.has(product.code)).map(product => ({
   code: product.code, name: product.name, category: product.category, productKind: product.productKind,
-  needs: [...(!product.image ? ['Оригинал фото производителя', 'Фото в утверждённом стиле'] : []), ...(!curated.has(product.code) ? ['Редакторская проверка названия', 'Источники характеристик', 'SEO-описание'] : []), ...(product.price === null ? ['Уточнить Розница ЛАБ.'] : [])],
+  needs: [...(!product.image ? ['Оригинал фото производителя', 'Фото в утверждённом стиле'] : []), ...product.unresolvedSpecs.map(label=>`Уточнить: ${label}`), ...(product.price === null ? ['Уточнить Розница ЛАБ.'] : [])],
 }));
 const selectedCount = snapshot.products.length + labinsk.products.length;
 await writeFile('private/moysklad/editorial-queue.json', JSON.stringify({ updatedAt: snapshot.completedAt, selected: selectedCount, publishedInCatalog: output.length, hiddenOperationalItems, remainingEditorialWork: queue.length, products: queue }, null, 2) + '\n');
