@@ -27,7 +27,7 @@ export const catalogCategories = [
   { name: 'ЛКМ и грунтовки', slug: 'paint', note: 'Краски, эмали и подготовка основания', image: '/assets/categories/paint-v1.png' },
   { name: 'Гидроизоляция и кровля', slug: 'waterproofing', note: 'Мастики, мембраны и кровельные материалы', image: '/assets/categories/waterproofing-v1.png' },
   { name: 'Пены и герметики', slug: 'foam', note: 'Монтажные пены и герметики', image: '/assets/categories/foam-v1.png' },
-  { name: 'Сетки и ленты', slug: 'meshes-tapes', note: 'Армирующие сетки, стеклохолст и ленты', image: '/assets/categories/all.png' },
+  { name: 'Сетки и ленты', slug: 'meshes-tapes', note: 'Армирующие сетки, стеклохолст и ленты', image: '/assets/categories/mesh-blue-photo.webp' },
   { name: 'Инструмент и расходники', slug: 'tools', note: 'Кисти, валики, шпатели и перчатки', image: '/assets/categories/tools-v1.png' },
   { name: 'Прочие материалы', slug: 'other', note: 'Дополнительные товары для объекта', image: '/assets/categories/all.png' },
 ];
@@ -37,7 +37,8 @@ export function categoryUrl(category: string) {
   return slug ? `/catalog/?category=${slug}#products` : '/catalog/#products';
 }
 
-export const catalogProducts = generated.products as CatalogProduct[];
+// JSON arrays have no tuple types; export-catalog validates specs and facet values.
+export const catalogProducts = generated.products as unknown as CatalogProduct[];
 export const featuredProducts = merchandising.featuredIds.flatMap(id => {
   const product = catalogProducts.find(item => item.id === id);
   return product && product.stock !== null && product.stock > 0 && product.price !== null && product.price > 0 && product.subgroup !== 'Саморезы' ? [product] : [];

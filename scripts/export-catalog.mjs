@@ -5,6 +5,8 @@ import { catalogInventory } from './catalog-inventory.mjs';
 import { inventoryPresentation, tidyTitle } from './catalog-presentation.mjs';
 import { inventoryFacets } from './catalog-inventory-facets.mjs';
 import { assertFacetCoverage } from './catalog-facet-coverage.mjs';
+import { selectionInventoryFacets } from './catalog-selection-facets.mjs';
+import { completeSelectionFacets, selectionCoverageReport } from './catalog-selection-coverage.mjs';
 
 const read = async file => JSON.parse(await readFile(file, 'utf8'));
 const [snapshot, editorial] = await Promise.all([
@@ -16,6 +18,7 @@ const merchandising = await read('catalog/merchandising.json');
 const labinsk = await read('private/moysklad/labinsk-metal-snapshot.json');
 const factRegistry = await read('catalog/product-facts.json');
 const facts = factRegistry.products;
+const selectionFacts = (await read('catalog/selection-facts.json')).products;
 const titles = await read('catalog/title-overrides.json');
 const selection = catalogInventory(snapshot, labinsk);
 const popularity = new Map(merchandising.rankedIds.map((code, index) => [code, merchandising.rankedIds.length - index]));
@@ -78,20 +81,22 @@ for (const live of selection.products) {
   const original = { ...live, name: live.rawName };
   const entry = curated.get(live.code);
   const fact = facts[live.code];
+  const selectionFact = selectionFacts[live.code];
   const { category, subgroup, productKind: kind } = classifyProduct(live);
   if (!titles[live.code] && !fact?.title && category !== 'Металлопрокат' && !['Саморезы','Стеновые профили','Потолочные профили','Маяки металлические'].includes(subgroup)) throw new Error(`Title review required: ${live.code}`);
   const brand = entry?.brand || fact?.brand || brandFor(original);
   const presented = inventoryPresentation(live, category, subgroup, brand, live.rawName);
   const name = tidyTitle(titles[live.code] || (fact?.title ? [fact.title, ...presented.packing].join(', ') : presented.name));
-  const filterFacts = { ...inventoryFacets({ name: live.rawName, category, subgroup, specs: entry?.specs || [] }), ...presented.facets, ...(fact?.facets || {}) };
+  const filterFacts = { ...inventoryFacets({ name: live.rawName, category, subgroup, specs: entry?.specs || [] }), ...presented.facets, ...(fact?.facets || {}), ...selectionInventoryFacets({ name, inventoryName: live.rawName, category, subgroup }), ...(selectionFact?.facets || {}) };
   if (live.code === '03232') delete filterFacts.density; // Warehouse says g/m; area density is unconfirmed.
-  const officialKeys = new Set([...(fact?.source?.scope || []), ...(fact?.additionalSources || []).flatMap(source=>source.scope)]);
+  const officialKeys = new Set([...(fact?.source?.scope || []), ...(fact?.additionalSources || []).flatMap(source=>source.scope), ...(selectionFact?.sources || []).flatMap(source=>source.scope)]);
   for (const key of ['base','application']) if (filterFacts[key] && !officialKeys.has(key)) throw new Error(`Missing manufacturer evidence for ${live.code}: ${key}`);
   assertFacetCoverage({ code: live.code, subgroup, facets: filterFacts }, fact);
+  completeSelectionFacets({code: live.code, subgroup, facets: filterFacts}, officialKeys);
   audit.push({ code:live.code, name, inventoryName:live.rawName, category, subgroup,
-    status:fact?.source?(fact.identityNote?'manufacturer-family-matched':'manufacturer-matched'):!brand?'generic-inventory':'manufacturer-page-unresolved',
-    officialSource:fact?.source||null,
-    additionalSources:fact?.additionalSources||[],
+    status:fact?.source || selectionFact?.sources?.length ? (fact?.identityNote?'manufacturer-family-matched':'manufacturer-matched'):!brand?'generic-inventory':'manufacturer-page-unresolved',
+    officialSource:fact?.source||selectionFact?.sources?.[0]||null,
+    additionalSources:[...(fact?.additionalSources||[]),...(selectionFact?.sources||[])],
     identityNote:fact?.identityNote||null,
     inventoryProperties:Object.keys(filterFacts).filter(key=>!officialKeys.has(key)),
     missingSemanticProperties:/Штукатурки|Шпаклёвки/.test(subgroup)?['base','application'].filter(key=>!filterFacts[key]):[],
@@ -123,6 +128,10 @@ for (const live of selection.products) {
   });
 }
 if (output.length !== selection.products.length) throw new Error('Catalog count mismatch.');
+for (const product of output) {
+  if (!product.specs.every(row => Array.isArray(row) && row.length === 2 && row.every(value => typeof value === 'string'))) throw new Error(`Invalid specification tuple: ${product.code}`);
+  if (!Object.values(product.facets).every(values => Array.isArray(values) && values.every(value => typeof value === 'string'))) throw new Error(`Invalid facet values: ${product.code}`);
+}
 if (new Set(output.map(product => product.slug)).size !== output.length || new Set(output.map(product => product.id)).size !== output.length) throw new Error('Duplicate routes or ids.');
 output.sort((left, right) => right.popularity - left.popularity);
 await writeFile('app/catalog/products.generated.json', JSON.stringify({ updatedAt: snapshot.completedAt, stockMoment: snapshot.stockMoment, labinskStockMoment:labinsk.stockMoment, selectedProducts: snapshot.products.length + labinsk.products.length, hiddenOperationalItems, hiddenByPolicy, products: output }, null, 2) + '\n');
@@ -134,3 +143,4 @@ const selectedCount = snapshot.products.length + labinsk.products.length;
 await writeFile('private/moysklad/editorial-queue.json', JSON.stringify({ updatedAt: snapshot.completedAt, selected: selectedCount, publishedInCatalog: output.length, hiddenOperationalItems, remainingEditorialWork: queue.length, products: queue }, null, 2) + '\n');
 console.log(JSON.stringify({ selected: selectedCount, publishedInCatalog: output.length, hiddenOperationalItems, categories: Object.fromEntries([...new Set(output.map(product => product.category))].sort().map(category => [category, output.filter(product => product.category === category).length])), withoutRetailPrice: output.filter(product => product.price === null).length, withoutFinalPhoto: output.filter(product => !product.image).length }));
 await writeFile('private/catalog-research/catalog-review.json',JSON.stringify({reviewedAt:factRegistry.reviewedAt,products:audit},null,2)+'\n');
+await writeFile('private/catalog-research/filter-coverage.json', JSON.stringify(selectionCoverageReport(output), null, 2)+'\n');

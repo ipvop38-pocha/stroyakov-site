@@ -1,0 +1,25 @@
+{
+  "reviewedAt": "2026-09-08",
+  "mode": "Original product photographs displayed together with CSS; source image files are unchanged",
+  "images": [
+    {
+      "asset": "/assets/categories/mesh-blue-photo.webp",
+      "product": "Синяя фасадная сетка PROFFIT",
+      "page": "https://alligator.group/catalog/tproduct/101865892522-setka-steklotkanevaya-proffit-160-sinyay",
+      "original": "https://static.tildacdn.com/stor3430-6137-4632-b865-356265643038/90431230.jpg",
+      "rendition": "https://optim.tildacdn.com/stor3430-6137-4632-b865-356265643038/-/cover/460x460/center/center/-/format/webp/90431230.jpg.webp"
+    },
+    {
+      "asset": "/assets/categories/mesh-welded-photo.jpg",
+      "product": "Сварная металлическая сетка",
+      "page": "http://lepse.ru/products/setka-svarnaya/setka-svarnaya-iz-otsinkovannoy-provoloki/",
+      "original": "http://lepse.ru/upload/iblock/e63/e636cf066774caa3aae54e5afc5ab369.jpg"
+    },
+    {
+      "asset": "/assets/categories/mesh-tapes-photo.jpg",
+      "product": "Бумажные соединительные ленты Danogips",
+      "page": "https://www.danogips.ru/katalog/aksessuari/bumazhnyie_soedinitelnyie_lentyi_danogips_dlya_zadelki_shvov",
+      "original": "https://www.danogips.ru/assets/components/phpthumbof/cache/448e44451ae6e2546303363f22ee5156.6b047cba0e03de111c26565ce9d9ca2b.jpg"
+    }
+  ]
+}

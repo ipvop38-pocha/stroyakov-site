@@ -1,0 +1,353 @@
+{
+  "labels": {
+    "base": "Основа",
+    "application": "Нанесение",
+    "purpose": "Назначение",
+    "packing": "Фасовка",
+    "sheetType": "Тип листа",
+    "thickness": "Толщина, мм",
+    "profileType": "Тип профиля",
+    "profileSize": "Сечение, мм",
+    "width": "Ширина, мм",
+    "length": "Длина, мм",
+    "density": "Плотность, г/м²",
+    "material": "Материал",
+    "shape": "Исполнение",
+    "stockLength": "Длина, м",
+    "diameter": "Диаметр, мм",
+    "nominalDiameter": "Условный проход ДУ, мм",
+    "adhesiveClass": "Класс клея",
+    "tileFormat": "Формат керамогранита",
+    "mixType": "Тип смеси",
+    "strengthGrade": "Марка / класс прочности",
+    "layerRange": "Слой нанесения, мм",
+    "sheetSize": "Размер, мм",
+    "productType": "Тип товара",
+    "beaconHeight": "Высота маяка, мм",
+    "metalThickness": "Толщина металла, мм",
+    "rollLength": "Длина рулона, м",
+    "meshCell": "Ячейка, мм",
+    "fastenerType": "Исполнение самореза",
+    "filmThickness": "Толщина, мкм",
+    "volume": "Объём, л",
+    "toothSize": "Размер зуба, мм",
+    "boreDiameter": "Посадочный диаметр, мм",
+    "workingLength": "Рабочая длина, мм",
+    "jointWidth": "Ширина шва, мм",
+    "color": "Цвет",
+    "season": "Сезонность",
+    "series": "Серия",
+    "roofType": "Тип кровельного материала",
+    "cementType": "Тип цемента"
+  },
+  "help": {
+    "adhesiveClass": "Полная маркировка производителя. T — уменьшенное сползание, E — увеличенное открытое время.",
+    "tileFormat": "Максимум по инструкции, кроме вариантов «таблица ИС»: там указан наибольший подтверждённый формат без заявления предела. Учитывайте основание и место укладки. Для керамической плитки ограничения могут отличаться.",
+    "density": "Для стеклосеток и стеклохолста. Для металлических сеток выбирайте ячейку и исполнение.",
+    "layerRange": "Диапазон для слоя по инструкции производителя; для конкретного основания возможны дополнительные ограничения."
+  },
+  "groups": {
+    "Штукатурки": [
+      "base",
+      "application",
+      "packing"
+    ],
+    "Шпаклёвки": [
+      "base",
+      "application",
+      "purpose",
+      "packing"
+    ],
+    "Плиточные клеи": [
+      "adhesiveClass",
+      "tileFormat",
+      "packing"
+    ],
+    "Кладка и монтаж": [
+      "mixType",
+      "strengthGrade",
+      "packing"
+    ],
+    "Монтажные клеи": [
+      "purpose",
+      "packing"
+    ],
+    "Клеи для теплоизоляции": [
+      "purpose",
+      "packing"
+    ],
+    "Стяжки и ровнители": [
+      "layerRange",
+      "application",
+      "packing"
+    ],
+    "Наливные полы": [
+      "layerRange",
+      "application",
+      "packing"
+    ],
+    "Гипс строительный": [
+      "strengthGrade",
+      "packing"
+    ],
+    "Затирки": [
+      "jointWidth",
+      "color",
+      "packing"
+    ],
+    "Гипсокартон": [
+      "sheetType",
+      "thickness",
+      "sheetSize"
+    ],
+    "OSB": [
+      "thickness",
+      "sheetSize"
+    ],
+    "Шифер": [
+      "shape",
+      "thickness",
+      "sheetSize"
+    ],
+    "Потолочные плиты": [
+      "sheetSize",
+      "thickness"
+    ],
+    "Стеновые профили": [
+      "profileType",
+      "profileSize",
+      "thickness",
+      "stockLength"
+    ],
+    "Потолочные профили": [
+      "profileType",
+      "profileSize",
+      "thickness",
+      "stockLength"
+    ],
+    "Маяки металлические": [
+      "beaconHeight",
+      "metalThickness",
+      "stockLength"
+    ],
+    "Маяки ПВХ": [
+      "beaconHeight",
+      "stockLength"
+    ],
+    "Уголки ПВХ": [
+      "productType",
+      "profileSize",
+      "stockLength"
+    ],
+    "Уголки металлические": [
+      "profileSize",
+      "thickness",
+      "stockLength"
+    ],
+    "Подвесы": [
+      "productType",
+      "thickness",
+      "length"
+    ],
+    "Соединители и удлинители": [
+      "productType"
+    ],
+    "Оконные профили": [
+      "productType",
+      "stockLength"
+    ],
+    "Минеральная вата": [
+      "thickness",
+      "series",
+      "sheetSize"
+    ],
+    "XPS": [
+      "thickness",
+      "sheetSize"
+    ],
+    "Подложки": [
+      "productType",
+      "thickness"
+    ],
+    "Грунтовки": [
+      "purpose",
+      "packing"
+    ],
+    "Краски": [
+      "purpose",
+      "packing"
+    ],
+    "Декоративные покрытия": [
+      "productType",
+      "packing"
+    ],
+    "Гидроизоляция обмазочная": [
+      "productType",
+      "packing"
+    ],
+    "Мастики и праймеры": [
+      "productType",
+      "packing"
+    ],
+    "Рулонная кровля": [
+      "roofType",
+      "rollLength"
+    ],
+    "Сетки и стеклохолст": [
+      "purpose",
+      "meshCell",
+      "density",
+      "rollLength"
+    ],
+    "Ленты": [
+      "purpose",
+      "width",
+      "rollLength"
+    ],
+    "Саморезы": [
+      "fastenerType",
+      "diameter",
+      "length",
+      "packing"
+    ],
+    "Дюбели": [
+      "purpose",
+      "diameter",
+      "length",
+      "packing"
+    ],
+    "Заклёпки": [
+      "diameter",
+      "length",
+      "packing"
+    ],
+    "Защитные плёнки": [
+      "productType",
+      "filmThickness",
+      "width",
+      "rollLength"
+    ],
+    "Мешки": [
+      "color",
+      "sheetSize"
+    ],
+    "Кисти": [
+      "shape",
+      "width"
+    ],
+    "Валики": [
+      "width",
+      "material"
+    ],
+    "Перчатки": [
+      "material"
+    ],
+    "Ёмкости": [
+      "productType",
+      "volume"
+    ],
+    "Правила": [
+      "stockLength"
+    ],
+    "Шпатели": [
+      "productType",
+      "width",
+      "toothSize"
+    ],
+    "Пистолеты для пены": [
+      "material"
+    ],
+    "Ножи и лезвия": [
+      "productType",
+      "width"
+    ],
+    "Отрезные диски": [
+      "diameter",
+      "thickness",
+      "boreDiameter"
+    ],
+    "Системы выравнивания плитки": [
+      "productType",
+      "jointWidth",
+      "packing"
+    ],
+    "Буры и свёрла": [
+      "diameter",
+      "length",
+      "workingLength"
+    ],
+    "Моющие средства": [
+      "packing"
+    ],
+    "Монтажные пены": [
+      "season",
+      "productType",
+      "packing"
+    ],
+    "Пены-клеи": [
+      "season",
+      "packing"
+    ],
+    "Трубы": [
+      "shape",
+      "profileSize",
+      "thickness",
+      "stockLength"
+    ],
+    "Арматура": [
+      "strengthGrade",
+      "shape",
+      "diameter",
+      "stockLength"
+    ],
+    "Листы стальные": [
+      "shape",
+      "thickness",
+      "sheetSize"
+    ],
+    "Высечка": [
+      "thickness",
+      "sheetSize"
+    ],
+    "Полосы стальные": [
+      "width",
+      "thickness",
+      "stockLength"
+    ],
+    "Проволока": [
+      "diameter"
+    ],
+    "Уголки стальные": [
+      "profileSize",
+      "thickness",
+      "stockLength"
+    ],
+    "Катанка": [
+      "diameter"
+    ],
+    "Швеллеры": [
+      "productType",
+      "profileSize",
+      "stockLength"
+    ],
+    "Заглушки для труб": [
+      "profileSize"
+    ],
+    "Цемент": [
+      "cementType",
+      "strengthGrade",
+      "packing"
+    ]
+  },
+  "groupLabels": {
+    "Швеллеры": {
+      "profileSize": "Номер / сечение"
+    },
+    "Трубы": {
+      "profileSize": "Сечение / диаметр, мм"
+    },
+    "Гидроизоляция обмазочная": {
+      "productType": "Форма выпуска"
+    }
+  }
+}
