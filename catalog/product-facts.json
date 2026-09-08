@@ -1,5 +1,5 @@
 {
-  "reviewedAt": "2026-09-07",
+  "reviewedAt": "2026-09-08",
   "products": {
     "00702": {
       "title": "Шпаклёвка Danogips SmartGips гипсополимерная",
@@ -1373,9 +1373,30 @@
       "reviewStatus": "manufacturer-page-unresolved"
     },
     "01058": {
-      "title": "Шпаклёвка Хабез Финиш",
-      "facets": {},
-      "reviewStatus": "manufacturer-page-unresolved"
+      "title": "Шпаклёвка Хабез Финиш гипсовая финишная",
+      "facets": {
+        "base": [
+          "Гипсовая"
+        ],
+        "application": [
+          "Ручное"
+        ],
+        "purpose": [
+          "Финишная"
+        ]
+      },
+      "source": {
+        "url": "https://cdn.lemanapro.ru/lmru/image/upload/c_pad/q_auto/f_auto/w_1000/h_1000/v1727264905/lmcode/R7bx7DtBZEi3U0cfQr861g/18024537.png",
+        "reviewedAt": "2026-09-08",
+        "scope": [
+          "base",
+          "application",
+          "purpose"
+        ],
+        "kind": "manufacturer-packaging",
+        "hostPage": "https://krasnodar.lemanapro.ru/product/shpaklevka-gipsovaya-finishnaya-habez-finish-25-kg-18024537/",
+        "evidenceNote": "Gypsum binder and thin-layer Finish series are printed on the factory bag; its application illustration shows a hand-held smoothing trowel. This supports manual use, without claiming machine use is prohibited."
+      }
     },
     "01057": {
       "title": "Штукатурка Хабез Синдика гипсовая",
@@ -1388,28 +1409,13 @@
         ]
       },
       "source": {
-        "url": "https://st13.stpulscen.ru/images/product/405/633/120_original.jpg",
-        "reviewedAt": "2026-09-07",
+        "url": "https://habez-gips.ru/katalog/shtukaturki/gipsovaya-shtukaturka-habez-sindika-30-kg/",
+        "reviewedAt": "2026-09-08",
         "scope": [
           "base",
           "application"
-        ],
-        "kind": "manufacturer-packaging",
-        "hostPage": "https://www.konstruktor-krd.ru/goods/187635948-shtukaturka_gipsovaya_ruchnogo_naneseniya_habez_cindika"
-      },
-      "identityNote": "Manufacturer packaging photograph is 25 kg; warehouse SKU explicitly specifies Sindika РН, 30 kg. Only gypsum binder and manual application are taken from the matching РН family; warehouse package size is retained.",
-      "additionalSources": [
-        {
-          "url": "https://habez-gips.ru/assets/templates/habez/img/cert-7.jpg?v=1751643268",
-          "scope": [
-            "base",
-            "application"
-          ],
-          "reviewedAt": "2026-09-07",
-          "kind": "manufacturer-archive",
-          "note": "Archived certificate (2021–2024) explicitly identifies Start and Sindika as gypsum plasters for manual application. Used only to corroborate product identity and packaging, not to claim current certification."
-        }
-      ]
+        ]
+      }
     },
     "01051": {
       "title": "Штукатурка Хабез Старт гипсовая",
@@ -1441,6 +1447,13 @@
           "reviewedAt": "2026-09-07",
           "kind": "manufacturer-archive",
           "note": "Archived certificate (2021–2024) explicitly identifies Start and Sindika as gypsum plasters for manual application. Used only to corroborate product identity and packaging, not to claim current certification."
+        },
+        {
+          "url": "https://habez-gips.ru/katalog/shtukaturki/shtukaturka-gipsovaya-habez-start-30-kg/",
+          "scope": [
+            "base"
+          ],
+          "reviewedAt": "2026-09-08"
         }
       ]
     },
@@ -1464,7 +1477,16 @@
         ],
         "kind": "manufacturer-packaging",
         "hostPage": "https://krasnodar.lemanapro.ru/product/shtukaturka-cementnaya-habez-zhane-10-mm-25-kg-81933501/"
-      }
+      },
+      "additionalSources": [
+        {
+          "url": "https://habez-gips.ru/katalog/shtukaturki/shtukaturnaya-smes-habez-zhane-25-kg/",
+          "scope": [
+            "base"
+          ],
+          "reviewedAt": "2026-09-08"
+        }
+      ]
     },
     "0545750": {
       "title": "Стяжка Хабез",
@@ -1559,6 +1581,9 @@
         ],
         "purpose": [
           "Финишная"
+        ],
+        "application": [
+          "Ручное"
         ]
       },
       "source": {
@@ -1568,7 +1593,19 @@
           "base",
           "purpose"
         ]
-      }
+      },
+      "additionalSources": [
+        {
+          "url": "https://www.knauf.ru/upload/iblock/dd1/rntqsn51mzy8giykywrrql41hdbxde8s/12-IL-KNAUF_Satengips-_18_07_2025_-v02-Preview.pdf",
+          "scope": [
+            "application"
+          ],
+          "pages": [
+            3
+          ],
+          "reviewedAt": "2026-09-08"
+        }
+      ]
     },
     "01163": {
       "title": "Шпаклёвка КНАУФ HP Finish гипсовая базовая",
@@ -1578,6 +1615,9 @@
         ],
         "purpose": [
           "Выравнивающая"
+        ],
+        "application": [
+          "Ручное"
         ]
       },
       "source": {
@@ -1587,7 +1627,19 @@
           "base",
           "purpose"
         ]
-      }
+      },
+      "additionalSources": [
+        {
+          "url": "https://www.knauf.ru/upload/iblock/d06/w6qcn9ovy3sri4dz59i4ihozwi4p10a5/10-IL-KNAUF_KHP-Finish-_02_09_2025_-v03-Preview.pdf",
+          "scope": [
+            "application"
+          ],
+          "pages": [
+            2
+          ],
+          "reviewedAt": "2026-09-08"
+        }
+      ]
     },
     "01152": {
       "title": "Штукатурка КНАУФ HP Start гипсовая базовая",
@@ -1723,6 +1775,9 @@
         ],
         "purpose": [
           "Финишная"
+        ],
+        "application": [
+          "Ручное"
         ]
       },
       "source": {
@@ -1732,7 +1787,20 @@
           "base",
           "purpose"
         ]
-      }
+      },
+      "additionalSources": [
+        {
+          "url": "https://dalsan.com.tr/CmsFiles/Documents/uygulama_satentek.pdf",
+          "scope": [
+            "application"
+          ],
+          "pages": [
+            6
+          ],
+          "reviewedAt": "2026-09-08"
+        }
+      ],
+      "identityNote": "Application instruction covers the SATENTEK family and lists 15/25 kg packaging. Only the shared trowel application method is used; the warehouse 20 kg pack is retained."
     },
     "00713": {
       "title": "Клей для стеклохолста Danogips KleiFix",

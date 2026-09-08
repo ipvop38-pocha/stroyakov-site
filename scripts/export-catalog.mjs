@@ -14,7 +14,8 @@ const [snapshot, editorial] = await Promise.all([
 const curated = new Map(editorial.filter(product => product.status === 'published').map(product => [product.code, product]));
 const merchandising = await read('catalog/merchandising.json');
 const labinsk = await read('private/moysklad/labinsk-metal-snapshot.json');
-const facts = (await read('catalog/product-facts.json')).products;
+const factRegistry = await read('catalog/product-facts.json');
+const facts = factRegistry.products;
 const titles = await read('catalog/title-overrides.json');
 const selection = catalogInventory(snapshot, labinsk);
 const popularity = new Map(merchandising.rankedIds.map((code, index) => [code, merchandising.rankedIds.length - index]));
@@ -132,4 +133,4 @@ const queue = output.filter(product => !product.image || !curated.has(product.co
 const selectedCount = snapshot.products.length + labinsk.products.length;
 await writeFile('private/moysklad/editorial-queue.json', JSON.stringify({ updatedAt: snapshot.completedAt, selected: selectedCount, publishedInCatalog: output.length, hiddenOperationalItems, remainingEditorialWork: queue.length, products: queue }, null, 2) + '\n');
 console.log(JSON.stringify({ selected: selectedCount, publishedInCatalog: output.length, hiddenOperationalItems, categories: Object.fromEntries([...new Set(output.map(product => product.category))].sort().map(category => [category, output.filter(product => product.category === category).length])), withoutRetailPrice: output.filter(product => product.price === null).length, withoutFinalPhoto: output.filter(product => !product.image).length }));
-await writeFile('private/catalog-research/catalog-review.json',JSON.stringify({reviewedAt:'2026-09-07',products:audit},null,2)+'\n');
+await writeFile('private/catalog-research/catalog-review.json',JSON.stringify({reviewedAt:factRegistry.reviewedAt,products:audit},null,2)+'\n');

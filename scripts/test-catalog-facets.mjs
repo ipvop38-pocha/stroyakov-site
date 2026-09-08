@@ -17,6 +17,20 @@ for (const key of ['base', 'application']) {
   }
 }
 assert.throws(() => assertFacetCoverage(complete, {}), /Missing manufacturer evidence/);
+const putty = products.filter(product => product.subgroup === 'Шпаклёвки');
+assert.equal(putty.length, 22);
+for (const product of putty) assertFacetCoverage(product, facts[product.id]);
+for (const code of ['01060', '01163', '01138', '01058']) {
+  assert.deepEqual(productFacets(item(code)).application, ['Ручное']);
+}
+assert.deepEqual(productFacets(item('01058')).base, ['Гипсовая']);
+const puttyFacets = availableFacets(putty, facetDefinitions('Сухие смеси', 'Шпаклёвки'), {});
+for (const key of ['base', 'application', 'purpose']) {
+  const options = puttyFacets.find(facet => facet.id === key).options;
+  const covered = new Set(options.flatMap(option => putty.filter(product => matchesFacets(productFacets(product), { [key]: [option.value] })).map(product => product.id)));
+  assert.equal(covered.size, putty.length, `${key} must cover all putties`);
+  assert.throws(() => assertFacetCoverage({ ...putty[0], facets: { ...putty[0].facets, [key]: [] } }, facts[putty[0].id]), /Incomplete catalog facets/);
+}
 for (const code of ['00907', '01051', '01057']) {
   assert.deepEqual(productFacets(item(code)).base, ['Гипсовая']);
   assert.deepEqual(productFacets(item(code)).application, ['Ручное']);
