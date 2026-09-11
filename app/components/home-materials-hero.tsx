@@ -23,7 +23,7 @@ export function HomeMaterialsHero() {
         </div>
         <div className="materials-copy">
           <p className="materials-eyebrow">Строяков · Материалы и решения</p>
-          <h1><span>Материалы<br />для стройки.</span><span>Подобраны<br />под задачу.</span></h1>
+          <h1><span>Материалы<br />для стройки</span><span>Подобраны<br />под задачу</span></h1>
           <p className="materials-description">Поможем выбрать совместимые материалы, рассчитать количество и собрать заказ на ваш объект.</p>
           <div className="materials-actions">
             <Link className="materials-primary" href="/catalog/">Открыть каталог <ArrowRight aria-hidden size={22} /></Link>

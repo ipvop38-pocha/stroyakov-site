@@ -6712,5 +6712,14 @@ summary:focus-visible {
 }
 
 @media (min-width: 1101px) { .materials-actions .materials-primary { min-width: 260px; } }
+/* Keep the wide-screen composition at a comfortable reading scale. */
+@media (min-width: 1400px) {
+  .materials-stage { min-height: clamp(660px, 37.5vw, 720px); }
+  .materials-art { left: auto; width: min(100%, 1480px); mask-image: linear-gradient(to right, transparent, #000 22%); }
+  .materials-copy { width: 520px; padding-block: 48px; }
+  .materials-copy h1 { font-size: 68px; }
+  .materials-description { font-size: 18px; }
+  .materials-benefits { margin-top: 32px; max-width: 490px; }
+}
 @media (min-width: 901px) and (max-width: 1100px) { .materials-benefits { max-width: 330px; } }
 @media (min-width: 768px) and (max-width: 900px) { .materials-copy { padding-inline: var(--materials-gutter); } .materials-categories { padding-inline: var(--materials-gutter); } .materials-categories img { width: 64px; height: 64px; } .materials-categories a { font-size: 16px; } }
