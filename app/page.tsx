@@ -6,41 +6,24 @@ import {
   ArrowRight,
   ChatCircle,
   Check,
-  ClipboardText,
-  Cube,
   GridFour,
-  Gauge,
-  Headset,
   Heart,
   List,
-  MagnifyingGlass,
   MapPin,
   Minus,
   Phone,
   Plus,
   ShoppingCartSimple,
-  Truck,
   User,
   X,
 } from "@phosphor-icons/react";
-import { FormEvent, useEffect, useMemo, useState } from "react";
-import { catalogProducts, featuredProducts, CatalogProduct as Product } from "./catalog/data";
+import { FormEvent, useEffect, useState } from "react";
+import { featuredProducts, CatalogProduct as Product } from "./catalog/data";
 import { ProductImage } from "./components/catalog-product-card";
 import { productPriceText, productStockText } from "./lib/product-presentation";
-import { matchesProductSearch } from "./lib/product-search";
+import { HomeMaterialsHero } from "./components/home-materials-hero";
+import { CatalogSearch } from "./components/catalog-search";
 import { readCart, readFavorites, writeCart, writeFavorites } from "./lib/commerce";
-
-const categories = [
-  { label: "Сухие смеси", image: "/assets/categories/dry-mixes.png", href: "/catalog/?category=mixes#products" },
-  { label: "Гипсокартон", image: "/assets/categories/drywall.png", href: "/catalog/?category=drywall#products" },
-  { label: "Профили", image: "/assets/categories/profiles.png", href: "/catalog/?category=profiles#products" },
-  { label: "Утеплители", image: "/assets/categories/insulation.png", href: "/catalog/?category=insulation#products" },
-  { label: "Кирпич и блоки", image: "/assets/categories/bricks.png", href: "/catalog/?category=bricks#products" },
-  { label: "Крепёж", image: "/assets/categories/fasteners.png", href: "/catalog/?category=fasteners#products" },
-  { label: "Все категории", image: "/assets/categories/all.png", href: "/catalog/" },
-];
-
-const products: Product[] = catalogProducts;
 
 const manufacturers = [
   ["Danogips", "ГКЛ и шпаклёвки", "/assets/brands/danogips.png"],
@@ -76,13 +59,6 @@ const serviceCards = [
     description: "Подберём транспорт и согласуем удобное время.",
     image: "/assets/services/delivery.png",
   },
-];
-
-const advantages = [
-  { icon: Truck, mobileIcon: Truck, title: "Своя логистика", mobileTitle: "Доставка по ЮФО", text: "Доставляем быстро и точно в удобное для вас время" },
-  { icon: ClipboardText, mobileIcon: ClipboardText, title: "Реальные остатки", mobileTitle: "Контроль качества", text: "Актуальные остатки 24/7 на складе и в пути" },
-  { icon: Cube, mobileIcon: Gauge, title: "Широкий ассортимент", mobileTitle: "Выгодные цены", text: "10 000+ товаров для всех этапов строительства" },
-  { icon: Headset, mobileIcon: Headset, title: "Решение под задачу", mobileTitle: "Решение под задачу", text: "Подберём материалы под ваш проект" },
 ];
 
 const pageRoutes: Record<string, string> = {
@@ -171,22 +147,8 @@ function ProductCard({ product, favorite, onFavorite, onAdd }: {
   );
 }
 
-function SearchResults({ items, onSelect }: { items: Product[]; onSelect: (product: Product) => void }) {
-  return (
-    <div className="search-results">
-      {items.length ? items.map((product) => (
-        <button key={product.id} onMouseDown={() => onSelect(product)} type="button">
-          <span><b>{product.name}</b><small>{product.brand} · {productStockText(product)}</small></span>
-          <strong>{productPriceText(product.price)}</strong>
-        </button>
-      )) : <p>По вашему запросу ничего не найдено</p>}
-    </div>
-  );
-}
-
 export default function Home() {
   const [query, setQuery] = useState("");
-  const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
@@ -197,11 +159,6 @@ export default function Home() {
   const [formState, setFormState] = useState<"idle" | "error" | "success">("idle");
   const [toast, setToast] = useState("");
 
-  const suggestions = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    if (!needle) return products.slice(0, 3);
-    return products.filter((product) => matchesProductSearch(product, needle)).slice(0, 4);
-  }, [query]);
   const drywallSheets = Math.ceil((area * 2) / 3);
   const screwCount = Math.ceil((area * 40) / 50) * 50;
 
@@ -278,19 +235,7 @@ export default function Home() {
           <button className="catalog-button" onClick={() => { window.location.href = "/catalog/"; }} type="button">
             Каталог <List aria-hidden weight="bold" />
           </button>
-          <div className="header-search">
-            <MagnifyingGlass aria-hidden weight="bold" />
-            <input
-              aria-label="Поиск по каталогу"
-              onBlur={() => window.setTimeout(() => setSearchOpen(false), 120)}
-              onChange={(event) => setQuery(event.target.value)}
-              onFocus={() => setSearchOpen(true)}
-              onKeyDown={(event) => { if (event.key === "Enter") window.location.href = `/catalog/?q=${encodeURIComponent(query.trim())}`; }}
-              placeholder="Найти товар, бренд или категорию"
-              value={query}
-            />
-            {searchOpen && <SearchResults items={suggestions} onSelect={(product) => { window.location.href = `/product/${product.slug}/`; }} />}
-          </div>
+          <CatalogSearch className="header-search" query={query} onQueryChange={setQuery} />
           <div className="header-actions">
             <button aria-label="Войти в личный кабинет" onClick={() => notify("Вход в кабинет подключим на этапе авторизации")} type="button">
               <User aria-hidden />
@@ -314,62 +259,10 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="mobile-search">
-          <MagnifyingGlass aria-hidden weight="bold" />
-          <input
-            aria-label="Поиск по каталогу"
-            onBlur={() => window.setTimeout(() => setSearchOpen(false), 120)}
-            onChange={(event) => setQuery(event.target.value)}
-            onFocus={() => setSearchOpen(true)}
-            onKeyDown={(event) => { if (event.key === "Enter") window.location.href = `/catalog/?q=${encodeURIComponent(query.trim())}`; }}
-            placeholder="Найти товар, бренд или категорию"
-            value={query}
-          />
-          {searchOpen && <SearchResults items={suggestions} onSelect={(product) => { window.location.href = `/product/${product.slug}/`; }} />}
-        </div>
+        <CatalogSearch className="mobile-search" query={query} onQueryChange={setQuery} />
       </header>
 
-      <section className="hero-section" id="top">
-        <div className="hero-scene">
-          <picture>
-            <source media="(max-width: 767px)" srcSet="/assets/hero-mobile-v2.png" />
-            <Image alt="Бобёр Строяков на складе строительных материалов" fill priority sizes="(max-width: 767px) 100vw, 70vw" src="/assets/hero-scene.png" />
-          </picture>
-        </div>
-        <div className="hero-copy">
-          <p className="eyebrow">Материалы для стройки</p>
-          <h1><span>Строим</span><b>Решения</b></h1>
-          <span className="brush-line" aria-hidden />
-          <p className="hero-description">Подберём материалы под задачу, проверим наличие и доставим на объект.</p>
-          <div className="hero-actions">
-            <PrimaryButton onClick={() => scrollToSection("calculation")}>Подобрать материалы</PrimaryButton>
-            <button className="text-link" onClick={() => scrollToSection("catalog")} type="button">Открыть каталог <ArrowRight aria-hidden className="mobile-link-icon" weight="bold" /></button>
-          </div>
-        </div>
-        <div className="advantages-band">
-          {advantages.map(({ icon: Icon, mobileIcon: MobileIcon, title, mobileTitle, text }) => (
-            <article key={title}>
-              <span className="advantage-icon"><Icon aria-hidden className="desktop-advantage-symbol" weight="bold" /><MobileIcon aria-hidden className="mobile-advantage-symbol" weight="bold" /></span>
-              <div><h2><span className="desktop-copy">{title}</span><span className="mobile-copy">{mobileTitle}</span></h2><p>{text}</p></div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="section categories-section" id="catalog">
-        <h2 className="section-title compact">Популярные категории</h2>
-        <div className="horizontal-viewport category-viewport">
-          <div className="category-track">
-            {categories.map((category) => (
-              <Link className="category-card" href={category.href} key={category.label}>
-                <span className="category-image"><Image alt="" fill sizes="150px" src={category.image} /></span>
-                <strong>{category.label}</strong>
-                <ArrowRight aria-hidden weight="bold" />
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      <HomeMaterialsHero />
 
       <section className="section products-section" id="products">
         <h2 className="section-title compact">Популярные товары</h2>
