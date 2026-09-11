@@ -55,6 +55,10 @@ export default function CatalogPage() {
     const requestedSubgroup = url.searchParams.get("group");
     if (initialCategory === "Инструмент и расходники" && ["Ленты", "Сетки и стеклохолст"].includes(requestedSubgroup || "")) initialCategory = "Сетки и ленты";
     setQuery(url.searchParams.get("q") || "");
+    if (url.searchParams.get("brands") === "all") {
+      setShowAllBrands(true);
+      if (window.matchMedia("(max-width: 767px)").matches) setFiltersOpen(true);
+    }
     setCategory(initialCategory);
     const initialSubgroup = catalogProducts.some(product => product.category === initialCategory && product.subgroup === requestedSubgroup) ? requestedSubgroup! : "Все подгруппы";
     setSubgroup(initialSubgroup);

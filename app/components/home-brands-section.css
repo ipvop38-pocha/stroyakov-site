@@ -1,0 +1,54 @@
+.home-brands { padding: 0 var(--page-gutter) 64px; background: var(--canvas); }
+.home-brands-heading { display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+.home-brands h2 { margin: 0; font-family: "Golos Text", Arial, sans-serif; font-size: clamp(26px, 2.5vw, 36px); line-height: 1.2; font-weight: 700; letter-spacing: -0.8px; }
+.home-brands-heading p { margin: 8px 0 0; color: var(--muted); font-size: 15px; line-height: 1.5; }
+.home-brands-heading > a { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: var(--brand); font-size: 14px; font-weight: 500; white-space: nowrap; }
+.home-brands a:focus-visible { outline: 2px solid var(--brand); outline-offset: 4px; border-radius: 4px; }
+.home-brands-heading > a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.home-brand-gallery { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 20px 0 0; padding: 0; list-style: none; }
+.home-brand-gallery li { border-bottom: 1px solid var(--border); min-width: 0; }
+.home-brand-gallery a { display: flex; align-items: center; justify-content: center; min-height: 110px; padding: 18px; }
+.home-brand-gallery a > span { position: relative; display: block; max-width: 100%; height: 60px; }
+.home-brand-gallery img { object-fit: contain; filter: grayscale(1) contrast(1.1); mix-blend-mode: multiply; transition: filter 160ms ease; }
+.home-brand-gallery a:hover img { filter: grayscale(0); }
+.home-projects { display: grid; grid-template-columns: 1.12fr 1fr; gap: 52px; margin-top: 56px; align-items: center; }
+.home-projects-photo { position: relative; aspect-ratio: 1.37; overflow: hidden; border-radius: 12px; }
+.home-projects-photo img { object-fit: cover; }
+.home-projects-eyebrow { margin: 0 0 16px; font-size: 11px; font-weight: 700; line-height: 1.6; letter-spacing: 1px; text-transform: uppercase; color: var(--brand); }
+.home-projects-copy h2 { font-size: clamp(28px, 2.8vw, 40px); }
+.home-projects-description { margin: 16px 0 0; font-size: 17px; line-height: 1.5; color: var(--muted); }
+.home-partners { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--border); }
+.home-partners h3 { margin: 0; font-family: "Golos Text", Arial, sans-serif; font-size: 16px; font-weight: 500; line-height: 1.5; }
+.home-partners ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 28px; margin: 18px 0 0; padding: 0; list-style: none; }
+.home-partners li { min-width: 0; display: flex; align-items: center; height: 40px; }
+.home-partners li > span { display: block; width: 100%; max-width: 128px; background-image: url('/assets/trusted/desktop.png'); background-repeat: no-repeat; filter: grayscale(1) brightness(.8) contrast(3); mix-blend-mode: multiply; }
+.home-projects-geography { margin: 22px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+@media (max-width: 1000px) {
+  .home-projects { gap: 32px; }
+  .home-projects-break { display: none; }
+  .home-projects-description { font-size: 16px; }
+  .home-partners ul { gap: 12px 20px; }
+  .home-brand-gallery a { padding-inline: 12px; }
+}
+@media (max-width: 767px) {
+  .home-brands { padding-bottom: 40px; }
+  .home-brands-heading { align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+  .home-brands-heading p { font-size: 14px; }
+  .home-brand-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 12px; }
+  .home-brand-gallery a { min-height: 94px; padding: 16px 22px; }
+  .home-brand-gallery a > span { height: 48px; }
+  .home-projects { grid-template-columns: 1fr; gap: 28px; margin-top: 36px; }
+  .home-projects-photo { aspect-ratio: 1.4; }
+  .home-projects-eyebrow { margin-bottom: 12px; font-size: 10px; }
+  .home-projects-copy h2 { font-size: 30px; }
+  .home-partners { margin-top: 24px; padding-top: 20px; }
+  .home-partners ul { gap: 14px 24px; }
+  .home-projects-geography { margin-top: 24px; }
+}
+@media (prefers-reduced-motion: reduce) { .home-brand-gallery img { transition: none; } }
+
+.home-brand-gallery img[alt="РОКС"] { filter: grayscale(1) brightness(1.7); }
+.home-brand-gallery a:hover img[alt="РОКС"] { filter: none; }
+.home-partners li:nth-child(4) > span { filter: grayscale(1) brightness(.65) contrast(5); }
+
+@media (min-width: 768px) and (max-width: 1000px) { .home-projects-photo { align-self: stretch; aspect-ratio: auto; min-height: 360px; } }

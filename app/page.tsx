@@ -23,21 +23,9 @@ import { ProductImage } from "./components/catalog-product-card";
 import { productPriceText, productStockText } from "./lib/product-presentation";
 import { HomeMaterialsHero } from "./components/home-materials-hero";
 import { HomeSupplySection } from "./components/home-supply-section";
+import { HomeBrandsSection } from "./components/home-brands-section";
 import { CatalogSearch } from "./components/catalog-search";
 import { readCart, readFavorites, writeCart, writeFavorites } from "./lib/commerce";
-
-const manufacturers = [
-  ["Danogips", "ГКЛ и шпаклёвки", "/assets/brands/danogips.png"],
-  ["Русгипс", "ГКЛ и гипсовые смеси", "/assets/brands/rusgips.png"],
-  ["Ильский строитель", "Смеси для наружной отделки", "/assets/brands/ilskiy.png"],
-  ["РОКС", "Штукатурные смеси", "/assets/brands/roks.png"],
-  ["Основит", "Смеси и системы", "/assets/brands/osnovit.png"],
-  ["ЕС", "Смеси для отделочных работ", "/assets/brands/es.png"],
-  ["ТЕХНОНИКОЛЬ", "Мембраны и теплоизоляция", "/assets/brands/technonicol.png"],
-  ["ПЕНОПЛЭКС", "Теплоизоляция", "/assets/brands/penoplex.png"],
-  ["IZOLIFE", "Каменная вата", "/assets/brands/izolife.png"],
-  ["ВОЛМА", "ГКЛ и строительные смеси", "/assets/brands/volma.png"],
-];
 
 const pageRoutes: Record<string, string> = {
   "Каталог": "/catalog/",
@@ -323,28 +311,7 @@ export default function Home() {
 
       <HomeSupplySection />
 
-      <section className="section manufacturers-section">
-        <div className="section-heading-row">
-          <div><h2 className="section-title">Популярные производители</h2><p><span className="desktop-copy">Выбирайте товары знакомых брендов — от гипсокартона и смесей до утеплителей.</span><span className="mobile-copy">Товары проверенных брендов — от ГКЛ и смесей до утеплителей.</span></p></div>
-          <button className="red-link desktop-only" onClick={() => notify("Полный список производителей откроется в каталоге")} type="button">Все производители</button>
-        </div>
-        <div className="manufacturer-grid">
-          {manufacturers.map(([name, category, image]) => (
-            <button className="manufacturer-card" key={name} onClick={() => { setQuery(name); scrollToSection("products"); }} type="button">
-              <span className="manufacturer-logo"><Image alt={name} fill sizes="220px" src={image} /></span>
-              <small>{category}</small>
-            </button>
-          ))}
-        </div>
-        <button className="all-manufacturers-mobile" onClick={() => notify("Полный список производителей откроется в каталоге")} type="button">Все производители <ArrowRight aria-hidden weight="bold" /></button>
-      </section>
-
-      <section aria-label="География поставок и партнёры Строяков" className="trusted-section">
-        <picture>
-          <source media="(max-width: 767px)" srcSet="/assets/trusted/mobile.png" />
-          <Image alt="Нам доверяют застройщики, подрядчики и объекты по всему Югу России" height={560} src="/assets/trusted/desktop.png" width={1440} />
-        </picture>
-      </section>
+      <HomeBrandsSection />
 
       <section className="calculation-section" id="calculation">
         <div className="calculation-card">
