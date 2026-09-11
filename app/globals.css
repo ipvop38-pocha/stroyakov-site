@@ -1,4 +1,5 @@
 :root {
+  --page-gutter: max(clamp(24px, 5.5556vw, 80px), calc((100% - 1440px) / 2 + 80px));
   --brand: #f20d18;
   --brand-dark: #d90914;
   --brand-soft: #fff1f2;
@@ -6529,7 +6530,7 @@ summary:focus-visible {
 /* Keep the original 1440px composition; only section backgrounds extend beyond it. */
 @media (min-width: 768px) {
   .inner-canvas, .main-navigation, .utility-bar {
-    padding-inline: max(clamp(24px, 5.5556vw, 80px), calc((100% - 1440px) / 2 + 80px));
+    padding-inline: var(--page-gutter);
   }
 }
 @media (min-width: 1440px) {
@@ -6624,7 +6625,7 @@ summary:focus-visible {
 
 
 /* Approved material-sculpture hero: live copy over a full-bleed photographic scene. */
-.materials-hero { --materials-gutter: max(clamp(24px, 6.05vw, 96px), calc((100% - 1586px) / 2 + 96px)); background: #f8f6f2; }
+.materials-hero { --materials-gutter: var(--page-gutter); background: #f8f6f2; }
 .materials-stage { position: relative; display: flex; align-items: center; min-height: clamp(680px, 50vw, 850px); }
 .materials-art { position: absolute; inset: 0; }
 .materials-art img { object-fit: cover; object-position: center; }
@@ -6723,3 +6724,12 @@ summary:focus-visible {
 }
 @media (min-width: 901px) and (max-width: 1100px) { .materials-benefits { max-width: 330px; } }
 @media (min-width: 768px) and (max-width: 900px) { .materials-copy { padding-inline: var(--materials-gutter); } .materials-categories { padding-inline: var(--materials-gutter); } .materials-categories img { width: 64px; height: 64px; } .materials-categories a { font-size: 16px; } }
+/* Header, hero and section headings share one content edge. */
+@media (min-width: 768px) {
+  .site-shell > .section, .calculation-section, .site-footer { padding-inline: var(--page-gutter); }
+}
+@media (max-width: 767px) {
+  :root { --page-gutter: 16px; }
+  .materials-copy { padding-inline: var(--page-gutter); }
+  .site-shell > .section { padding-inline: var(--page-gutter); }
+}

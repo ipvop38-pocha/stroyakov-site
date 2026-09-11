@@ -10,6 +10,13 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "СТРОЯКОВ — строительные материалы и готовые решения",
   description: "Подбор строительных материалов, актуальные остатки и доставка на объект по Краснодару и ЮФО.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },
+      { url: "/favicon.svg", type: "image/svg+xml", sizes: "any" },
+    ],
+    apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
