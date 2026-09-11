@@ -22,6 +22,7 @@ import { featuredProducts, CatalogProduct as Product } from "./catalog/data";
 import { ProductImage } from "./components/catalog-product-card";
 import { productPriceText, productStockText } from "./lib/product-presentation";
 import { HomeMaterialsHero } from "./components/home-materials-hero";
+import { HomeSupplySection } from "./components/home-supply-section";
 import { CatalogSearch } from "./components/catalog-search";
 import { readCart, readFavorites, writeCart, writeFavorites } from "./lib/commerce";
 
@@ -36,29 +37,6 @@ const manufacturers = [
   ["ПЕНОПЛЭКС", "Теплоизоляция", "/assets/brands/penoplex.png"],
   ["IZOLIFE", "Каменная вата", "/assets/brands/izolife.png"],
   ["ВОЛМА", "ГКЛ и строительные смеси", "/assets/brands/volma.png"],
-];
-
-const serviceCards = [
-  {
-    title: "Рассчитаем количество",
-    description: "По площади, размерам или готовому списку.",
-    image: "/assets/services/calculation.png",
-  },
-  {
-    title: "Подберём товары",
-    description: "По задаче, бюджету и наличию.",
-    image: "/assets/services/products.png",
-  },
-  {
-    title: "Соберём заказ",
-    description: "Объединим материалы в одну заявку и подготовим к выдаче.",
-    image: "/assets/services/order.png",
-  },
-  {
-    title: "Доставим на объект",
-    description: "Подберём транспорт и согласуем удобное время.",
-    image: "/assets/services/delivery.png",
-  },
 ];
 
 const pageRoutes: Record<string, string> = {
@@ -343,28 +321,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section services-section" id="business">
-        <div className="section-heading-row"><div><h2 className="section-title"><span className="desktop-copy">Поможем со снабжением объекта</span><span className="mobile-copy">Поможем со снабжением</span></h2><p>Расчёт, подбор, комплектация и доставка — одной заявкой.</p></div></div>
-        <div className="services-layout">
-          <article className="service-lead-card">
-            <div>
-              <h3>Соберём заказ под вашу задачу</h3>
-              <p>Пришлите список, фото или размеры. Рассчитаем количество, подберём товары и организуем доставку.</p>
-              <small>Фото, таблица или смета — подойдёт любой формат.</small>
-              <PrimaryButton onClick={() => scrollToSection("calculation")}>Рассчитать заказ</PrimaryButton>
-            </div>
-            <Image alt="Специалист Строяков по комплектации объектов" height={348} src="/assets/services/manager.png" width={217} />
-          </article>
-          <div className="services-grid">
-            {serviceCards.map((service) => (
-              <button className="service-card" key={service.title} onClick={() => scrollToSection("calculation")} type="button">
-                <span><h3>{service.title}</h3><p>{service.description}</p></span>
-                <span className="service-image"><Image alt="" fill sizes="180px" src={service.image} /></span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
+      <HomeSupplySection />
 
       <section className="section manufacturers-section">
         <div className="section-heading-row">

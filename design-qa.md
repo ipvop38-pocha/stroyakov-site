@@ -1,50 +1,33 @@
-# Главный экран — выбранный вариант 1
+# Supply section design QA — 2026-09-11
 
-Дата: 2026-09-11. Final result: passed.
+final result: passed
 
-Область проверки: новый первый экран главной страницы, переходы в категории, подбор по списку, сохранённые поиск и закреплённый хедер. Это локальная реализация; публикация этой версии не выполнялась.
+## Visual target and evidence
+- Selected target: ChatGPT generated image file_00000000a32c81f4a33cd37986db6f56, explicitly approved by the user.
+- Source capture: private/catalog-research/supply-reference-qa.png (996×920), source region private/catalog-research/supply-reference-region.png.
+- Implementation: http://127.0.0.1:3000/#business; screenshot private/catalog-research/supply-desktop-final.png (1425×990 viewport content, requested desktop viewport 1440×1000).
+- Same-state side-by-side comparison: private/catalog-research/supply-comparison-final.jpg. Browser chrome excluded; content widths normalized to 1000 px, aspect ratios preserved. Source region 682×335 and implementation region 1252×581. Scale differences were not treated as product defects.
+- Focused banner and process text are readable in the combined image; separate detail crops were unnecessary.
+- Mobile and tablet evidence: private/catalog-research/supply-mobile-qa.png, supply-tablet-qa.png.
 
-## Визуальная цель и метод
+## Findings and iteration history
+1. P2: initial cover image cropped the employee cap on desktop. Reduced the photo container to 76% of the banner and moved its focal point upward. Final capture shows head and tablet.
+2. P2: warehouse detail competed with copy at 768 px. Added a photo mask into the charcoal background, disabled on stacked mobile layout. Tablet recapture confirms readable copy and separated employee.
+3. Original defects resolved: no photo step cards, no images overlapping text, no fixed service-section height, no mismatching gradients between adjacent sections.
 
-Источник: `private/catalog-research/approved-homepage-materials-v1.png`, 1586 × 992 px. Выбранный пользователем светлый макет с композицией материалов на красном подиуме.
+## Required fidelity surfaces
+- Typography: existing Golos Text, 36 px section heading / up to 38 px banner heading, 17 px step titles, 14 px descriptions. Slightly more restrained than the raster mock to keep the existing site type scale. No truncation or hidden copy.
+- Spacing: shared page gutters; 72 px section transition on desktop / 48 px mobile; four open step columns desktop, two columns mobile. Header and section left edges match exactly.
+- Color: existing warm canvas retained consistently across solutions, supply and manufacturers. Charcoal banner and red CTA match selected direction.
+- Image: dedicated generated warehouse photo, 2048×768, optimized WebP 66,538 bytes; no rasterized UI. Phosphor library icons remain crisp. Regenerated employee photo preserves the approved composition, rather than copying screenshot pixels.
+- Copy: approved banner and four process steps; real email and phone actions in the request dialog.
 
-Сравнение: http://127.0.0.1:3000/materials-compare.html. Исходник и живая реализация одновременно показаны в одном скриншоте браузера 1280 × 720 px; обе панели имеют одинаковый масштаб около 0,396. Реализация рендерится в iframe шириной 1586 CSS px; её полоса прокрутки занимает 15 px. Из сравнения исключены верхние 74 px исходника и 116 px реализации: существующий одобренный хедер намеренно сохранён. Поэтому сравнение оценивает композицию, а не заявляет пиксельное совпадение.
+## Verification
+- Production build: 454 static routes; TypeScript checks passed.
+- Widths 320, 390, 768, 1024, 1440 and 1920 inspected. Automated DOM measurements at 320/768/1024/1920: no horizontal overflow, zero header/section left-edge delta, photo loaded, identical section background colors. See supply-responsive-qa.json.
+- Primary CTA opens labeled native dialog, email URL is valid, Escape closes it and focus returns to CTA. No request is represented as submitted.
+- Browser console: no errors captured.
+- Existing manufacturer content, catalogue, search and sticky header retained.
 
-Фон подготовлен генерацией по выбранному изображению: 1774 × 887 px. Опубликованный в локальной сборке WebP занимает 116108 байт. Заголовок, описание, кнопки, преимущества и навигация реализованы HTML, а не впечатываются в фон.
-
-## Исправления по результатам сравнения
-
-| Приоритет | До | После | Проверка |
-| --- | --- | --- | --- |
-| P2 | Левый отступ был шире макета; подзаголовок и CTA мельче | Скорректированы поля, размер описания, цвет надзаголовка и ширина основной кнопки | Повторное совместное сравнение 11 сентября |
-| P2 | На 768 px преимущества подходили к изображению, категориям не хватало места | До 900 px текст и изображение расположены последовательно, категории в два столбца | Визуальная проверка планшета; замеры адаптива |
-| P2 | На 1024 px подпись доставки заходила к красному подиуму | Ширина строки преимуществ ограничена 330 px на 901–1100 px | Новый скриншот 1024 px: все подписи на свободном светлом поле |
-
-Итоговая сверка: сохранены четыре строки заголовка, чёрно-красная иерархия, светлая сцена, красный подиум, основная и дополнительная кнопки, три преимущества и полоса четырёх категорий. Изображение доходит до правого края области страницы. Нерешённых P0/P1/P2 в проверенном первом экране нет.
-
-P3 / намеренные отличия: используются действующие иллюстрации категорий сайта вместо маленьких изображений из сгенерированного макета; шрифт Golos Text даёт небольшую разницу в очертаниях и переносах описания. Существующий хедер выше нарисованного, поскольку сохраняет служебную навигацию, поиск и функции магазина.
-
-## Проверки
-
-- Финальная production-сборка Next.js: успешно, 454 страницы, проверка TypeScript и lint включена.
-- `git diff --check`: успешно.
-- Ширины iframe: 320, 390, 768, 1024, 1440, 1920 CSS px. Горизонтального переполнения страницы и hero нет; зазор изображения справа 0 px; четыре ссылки категорий присутствуют.
-- После скролла на 700 px верх хедера остаётся на 0 px на всех проверенных ширинах. Переход к категориям оставляет 24 px под хедером.
-- В браузере проверены переход «Открыть каталог» и применение категории «Профили». У четырёх ссылок корректные параметры mixes, drywall, profiles, insulation.
-- «Подобрать по списку» открывает native dialog с действующими контактами магазина. Escape закрывает его и возвращает фокус на кнопку. Почта и телефон не активировались: никаких сообщений при тесте не отправлялось.
-- Поиск «шифер» показывает первым переход в раздел с 5 позициями, ниже — пять товаров. Пустой запрос не показывает выпадающий список. Общий компонент поиска сохранён.
-- В проверенном переходе главная → каталог ошибок browser console не было.
-
-Воспроизведение локального визуального стенда после сборки: `node private/catalog-research/make-materials-qa.mjs`. Он создаёт только игнорируемые файлы внутри `out/`; стенд не является частью продуктовой навигации.
-
-## Корректировка масштаба на широких экранах — 2026-09-11
-
-По замечанию пользователя заголовок теперь без точек. При ширине от 1400 px заголовок 68 px (ранее до 86 px), описание 18 px, высота сцены 660–720 px (ранее до 850 px). Ширина изображения ограничена 1480 px; левый край плавно соединён с фоном. Изображение остаётся у правого края, без масштабирования всего интерфейса.
-
-Повторная production-сборка: 454 страницы, успешно. Замеры 320/390/768/1024/1440/1920 px: переполнения нет, правый зазор 0 px, sticky top 0 px, отступ якоря 24 px. Визуально проверен уменьшенный экран на 1920 px. Изменение масштаба заменяет прежние требования точного размера из первого макета по прямому указанию пользователя.
-
-## Общая сетка и favicon — 2026-09-11
-
-По скриншоту пользователя устранено расхождение между левой линией хедера и первого экрана. Общая переменная `--page-gutter` используется хедером, hero, категориями и заголовками разделов. На мобильных экранах отступ 16 px. Замеры в браузере на 320/390/768/1024/1440/1920 px: heroAlignment=0, sectionAlignment=0, горизонтального переполнения нет; хедер закреплён на top=0. Проверен скриншот широкой компоновки.
-
-Добавлен компактный векторный знак с красной каской на основе фирменной символики: favicon.svg, favicon.ico (16/32/48 px) и apple-touch-icon.png (180 px). Метаданные общего layout формируют три корректных link-тега. Форматы и содержимое ICO проверены. Next.js production build успешно сформировал 454 страницы.
+## Follow-up polish
+No blocking P0/P1/P2 issues remain. Existing global telephone form elsewhere on the homepage is outside this selected section and remains unchanged.

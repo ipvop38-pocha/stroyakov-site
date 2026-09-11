@@ -1,0 +1,80 @@
+/* One canvas and shared gutters across solutions, supply and manufacturers. */
+.site-shell > .solutions-section {
+  height: auto;
+  padding-bottom: 0;
+  background: var(--canvas);
+}
+
+.site-shell > .supply-section {
+  padding-block: 72px;
+  background: var(--canvas);
+}
+
+.supply-heading { margin-bottom: 24px; }
+.supply-heading h2 {
+  margin: 0;
+  font-family: "Golos Text", Arial, sans-serif;
+  font-size: clamp(26px, 2.5vw, 36px);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.8px;
+}
+.supply-heading p { margin: 8px 0 0; color: var(--muted); font-size: 17px; line-height: 1.5; }
+
+.supply-banner { position: relative; isolation: isolate; overflow: hidden; border-radius: 16px; background: #191b1c; }
+.supply-photo { position: absolute; inset: 0 0 0 auto; width: 76%; z-index: -1; mask-image: linear-gradient(to right, transparent, #000 55%); }
+.supply-photo img { object-fit: cover; object-position: right 20%; }
+.supply-copy { position: relative; width: 53%; padding: 36px 40px; color: #fff; }
+.supply-copy h3 {
+  margin: 0;
+  font-family: "Golos Text", Arial, sans-serif;
+  font-size: clamp(28px, 2.7vw, 38px);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.8px;
+}
+.supply-copy p { max-width: 410px; margin: 18px 0 22px; color: #e2e2e2; font-size: 16px; line-height: 1.5; }
+.supply-button { display: inline-flex; justify-content: center; align-items: center; gap: 20px; min-height: 48px; padding: 13px 24px; border: 0; border-radius: 8px; background: #ff1028; color: white; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 160ms ease; }
+.supply-button:hover { background: #df0a20; }
+.supply-button:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+.supply-copy small { display: block; margin-top: 12px; color: #b9babc; font-size: 13px; line-height: 1.5; }
+
+.supply-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px; margin: 36px 0 0; padding: 0; list-style: none; }
+.supply-steps li { min-width: 0; }
+.supply-step-number { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; color: var(--brand); font-size: 12px; line-height: 1; font-weight: 600; }
+.supply-step-number::after { content: ""; flex: 1; height: 1px; background: #d4cfc8; }
+.supply-step-icon { display: block; margin-bottom: 12px; }
+.supply-steps h3 { margin: 0; font-family: "Golos Text", Arial, sans-serif; font-size: 17px; font-weight: 600; line-height: 1.35; letter-spacing: -0.2px; }
+.supply-steps p { max-width: 240px; margin: 7px 0 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+
+.site-shell > .manufacturers-section { height: auto; padding-top: 0; padding-bottom: 64px; background: var(--canvas); }
+.manufacturers-section > .section-heading-row { height: auto; padding-top: 40px; border-top: 1px solid var(--border); }
+
+@media (min-width: 601px) and (max-width: 1000px) {
+  .supply-copy { width: 59%; padding: 30px; }
+  .supply-copy h3 { font-size: 30px; }
+  .supply-copy p { font-size: 15px; }
+  .supply-steps { gap: 20px; }
+  .supply-steps h3 { font-size: 16px; }
+}
+@media (max-width: 767px) {
+  .site-shell > .supply-section { padding-block: 48px; }
+  .supply-heading p { font-size: 15px; }
+  .supply-heading { margin-bottom: 20px; }
+  .supply-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 20px; margin-top: 28px; }
+  .supply-steps h3 { font-size: 16px; }
+  .supply-steps p { font-size: 14px; }
+  .site-shell > .manufacturers-section { padding-bottom: 40px; }
+  .manufacturers-section > .section-heading-row { padding-top: 32px; }
+}
+@media (max-width: 600px) {
+  .supply-banner { display: flex; flex-direction: column; }
+  .supply-copy { order: 0; width: 100%; padding: 28px 24px 24px; }
+  .supply-copy h3 { font-size: 28px; }
+  .supply-copy p { margin: 16px 0 20px; font-size: 15px; }
+  .supply-copy small { font-size: 12px; }
+  .supply-photo { order: 1; position: relative; inset: auto; width: 100%; height: 220px; z-index: 0; overflow: hidden; mask-image: none; }
+  .supply-photo img { width: 155% !important; max-width: none; left: -55% !important; object-position: 80% center; }
+  .supply-button { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { .supply-button { transition: none; } }

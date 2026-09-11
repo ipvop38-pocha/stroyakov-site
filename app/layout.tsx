@@ -6,6 +6,7 @@ import "@fontsource/golos-text/cyrillic-700.css";
 import "@fontsource/golos-text/cyrillic-800.css";
 import "@fontsource/roboto-condensed/cyrillic-900.css";
 import "./globals.css";
+import "./components/home-supply-section.css";
 
 export const metadata: Metadata = {
   title: "СТРОЯКОВ — строительные материалы и готовые решения",
